@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>Management Dashboard - Cloud Sync Enabled</title>
+    <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --dark-bg: #0f172a;
+            --card-bg: #1e293b;
+            --accent-gold: #fbbf24;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --text-main: #f8fafc;
+            --border-color: #334155;
+        }
+
+        body { font-family: 'Mitr', sans-serif; background: var(--dark-bg); color: var(--text-main); margin: 0; padding: 20px; }
+        .container { max-width: 1800px; margin: auto; }
+
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+
+        .tabs-nav { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; }
+        .tab-btn { padding: 10px 20px; border: none; background: #334155; color: #94a3b8; cursor: pointer; border-radius: 6px; font-family: 'Mitr'; transition: 0.2s; }
+        .tab-btn.active { background: var(--accent-blue); color: white; }
+        .tab-rank.active { background: var(--accent-gold); color: black; font-weight: bold; }
+
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Cloud Sync Bar */
+        .sync-bar { background: #1e3a8a; padding: 15px; border-radius: 10px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; border: 1px solid #3b82f6; }
+
+        .controls-bar { background: var(--card-bg); padding: 15px; border-radius: 10px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; border: 1px solid var(--border-color); }
+        input[type="month"] { background: #0f172a; border: 1px solid #3b82f6; color: white; padding: 8px 15px; border-radius: 5px; font-family: 'Mitr'; cursor: pointer; }
+
+        /* Grid Table Styling */
+        table { width: 100%; border-collapse: collapse; background: var(--card-bg); border-radius: 8px; overflow: hidden; }
+        th { background: #0f172a; padding: 12px 5px; color: #94a3b8; border: 1px solid var(--border-color); font-size: 13px; white-space: nowrap; }
+        td { border: 1px solid var(--border-color); padding: 0; }
+        
+        .grid-input { width: 100%; height: 100%; padding: 10px; background: transparent; border: none; color: white; text-align: center; font-family: 'Mitr'; font-size: 14px; outline: none; }
+        .grid-input:focus { background: #1e3a8a; box-shadow: inset 0 0 0 2px #3b82f6; }
+        .grid-input::placeholder { color: #475569; font-size: 12px; }
+        
+        .grid-input[readonly] { cursor: default; font-weight: bold; }
+        .date-col { background: #0f172a; color: #94a3b8; text-align: center; font-size: 13px; width: 100px; }
+        
+        /* Footer Styling */
+        .sum-row td { background: #0f172a; color: var(--accent-gold); font-weight: bold; padding: 12px 5px; text-align: center; font-size: 14px; border-top: 2px solid var(--accent-gold); }
+
+        /* Dashboard Styles */
+        .rank-card { display: flex; align-items: center; padding: 15px; background: var(--card-bg); margin-bottom: 10px; border-radius: 8px; border-left: 5px solid var(--accent-gold); }
+        .comm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-top: 20px; }
+        .comm-box { background: var(--card-bg); padding: 20px; border-radius: 8px; border: 1px solid var(--border-color); }
+        
+        .profit-pos { color: var(--accent-green); }
+        .profit-neg { color: var(--accent-red); }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="sync-bar">
+        <strong style="color: white;">🌐ตารางรวมยอดทีม AT :</strong>
+        <button class="tab-btn" onclick="uploadToCloud()" style="background: #10b981; color: white;">⬆️ บันทึก</button>
+        <button class="tab-btn" onclick="downloadFromCloud()" style="background: #f59e0b; color: white;">⬇️ ดึงข้อมูลล่าสุด</button>
+        <span id="syncStatus" style="font-size: 13px; color: #cbd5e1; margin-left: 10px;">กรุณากด "ดึงข้อมูลล่าสุด" ก่อนเริ่มใช้งาน</span>
+    </div>
+
+    <div class="tabs-nav">
+        <button class="tab-btn tab-rank active" onclick="switchTab('ranking')">🏆 DASHBOARD</button>
+        <button class="tab-btn" onclick="switchTab('p1')">宝宝 - 冬冬</button>
+        <button class="tab-btn" onclick="switchTab('p2')">阿山 - 阿宁</button>
+        <button class="tab-btn" onclick="switchTab('p3')">好运 - 阿特</button>
+        <button class="tab-btn" onclick="switchTab('p4')">UX - 阿瓜</button>
+    </div>
+
+    <div id="ranking" class="tab-content active">
+        <h2>🥇 อันดับกำไรสะสม (All Time)</h2>
+        <div id="rankList"></div>
+        <h2 style="margin-top:30px;">💰 สรุปค่าคอมมิชชัน</h2>
+        <div id="commList" class="comm-grid"></div>
+        <h2 style="margin-top:30px;">📊 ภาพรวมทั้งหมด</h2>
+        <table style="margin-top:10px;">
+            <thead><tr><th>ทีม</th><th>ค่าแอท</th><th>ยอดฝาก</th><th>ธรรมเนียม</th><th>ยอดถอน</th><th>กำไรสุทธิ</th></tr></thead>
+            <tbody id="grandTable"></tbody>
+        </table>
+    </div>
+
+    <div id="teamContainer"></div>
+
+</div>
+
+<script>
+    const CLOUD_URL = 'https://script.google.com/macros/s/AKfycbyknJSDgrQMoFMjQQdTWRaX9fmYQ3rdYl5bjnoS-w4ZDtxthOQKXbKe71EAa2v6sjUe/exec';
+
+    const PAIRS = [
+        { id: 'p1', name: '宝宝 - 冬冬' },
+        { id: 'p2', name: '阿山 - 阿宁' },
+        { id: 'p3', name: '好运 - 阿特' },
+        { id: 'p4', name: 'UX - 阿瓜' }
+    ];
+
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    const container = document.getElementById('teamContainer');
+
+    PAIRS.forEach(p => {
+        container.innerHTML += `
+            <div id="${p.id}" class="tab-content">
+                <div class="controls-bar">
+                    <h3>👤 ทีม: ${p.name}</h3>
+                    <div style="margin-left:auto; display:flex; align-items:center; gap:10px;">
+                        <label>เลือกเดือน:</label>
+                        <input type="month" id="month_${p.id}" value="${currentMonth}" onchange="renderTable('${p.id}')">
+                    </div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="date-col">วันที่</th>
+                            <th>ค่าแอท</th>
+                            <th>ยอดฝาก</th>
+                            <th>ธรรมเนียม (32%)</th>
+                            <th>ยอดถอน</th>
+                            <th>เปิดบิล</th>
+                            <th>กำไร</th> </tr>
+                    </thead>
+                    <tbody id="tbody_${p.id}"></tbody>
+                    <tfoot id="tfoot_${p.id}">
+                        <tr class="sum-row" id="sumRow_${p.id}">
+                            <td>รวมเดือนนี้</td>
+                            <td id="sum_ads_${p.id}">0</td>
+                            <td id="sum_dep_${p.id}">0</td>
+                            <td id="sum_fee_${p.id}">0</td>
+                            <td id="sum_wd_${p.id}">0</td>
+                            <td id="sum_bill_${p.id}">0</td>
+                            <td id="sum_profit_${p.id}">0</td> </tr>
+                    </tfoot>
+                </table>
+            </div>
+        `;
+    });
+
+    window.onload = () => {
+        PAIRS.forEach(p => renderTable(p.id));
+        updateDashboard();
+    };
+
+    function switchTab(id) {
+        document.querySelectorAll('.tab-content, .tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        if(event) event.currentTarget.classList.add('active');
+        if(id === 'ranking') updateDashboard();
+    }
+
+    function renderTable(pId) {
+        const monthVal = document.getElementById(`month_${pId}`).value;
+        const [year, month] = monthVal.split('-').map(Number);
+        const daysInMonth = new Date(year, month, 0).getDate();
+        const tbody = document.getElementById(`tbody_${pId}`);
+        const allData = JSON.parse(localStorage.getItem('fin_data_' + pId) || '[]');
+
+        tbody.innerHTML = '';
+
+        for(let d = 1; d <= daysInMonth; d++) {
+            const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+            const rowData = allData.find(r => r.date === dateStr) || {};
+            
+            const ads = rowData.ads || '';
+            const dep = rowData.dep || '';
+            const fee = rowData.fee || '';
+            const wd = rowData.wd || '';
+            const bill = rowData.bill || '';
+            
+            let profitVal = '';
+            if(dep !== '' || ads !== '' || fee !== '' || wd !== '') {
+                profitVal = (Number(dep) || 0) - ((Number(ads) || 0) + (Number(fee) || 0) + (Number(wd) || 0));
+            }
+
+            const profitColor = profitVal < 0 ? 'profit-neg' : 'profit-pos';
+
+            tbody.innerHTML += `
+                <tr data-date="${dateStr}">
+                    <td class="date-col">${dateStr}</td>
+                    <td><input type="number" class="grid-input col-ads" value="${ads}" placeholder="-" oninput="handleInput('${pId}', '${dateStr}')"></td>
+                    <td><input type="number" class="grid-input col-dep" value="${dep}" placeholder="-" oninput="handleInput('${pId}', '${dateStr}')"></td>
+                    <td><input type="number" class="grid-input col-fee" value="${fee}" readonly></td>
+                    <td><input type="number" class="grid-input col-wd" value="${wd}" placeholder="-" oninput="handleInput('${pId}', '${dateStr}')"></td>
+                    <td><input type="number" class="grid-input col-bill" value="${bill}" placeholder="-" oninput="handleInput('${pId}', '${dateStr}')"></td>
+                    <td><input type="text" class="grid-input col-profit ${profitColor}" value="${profitVal !== '' ? profitVal.toLocaleString() : '-'}" readonly></td>
+                </tr>
+            `;
+        }
+        updateFooter(pId);
+    }
+
+    function handleInput(pId, dateStr) {
+        const row = document.querySelector(`#tbody_${pId} tr[data-date="${dateStr}"]`);
+        const adsVal = Number(row.querySelector('.col-ads').value) || 0;
+        const depVal = Number(row.querySelector('.col-dep').value) || 0;
+        const wdVal = Number(row.querySelector('.col-wd').value) || 0;
+        const billVal = row.querySelector('.col-bill').value; 
+
+        const feeVal = Math.round(depVal * 0.32);
+        row.querySelector('.col-fee').value = feeVal;
+
+        const profitVal = depVal - (adsVal + feeVal + wdVal);
+        const profitInput = row.querySelector('.col-profit');
+        profitInput.value = profitVal.toLocaleString();
+        profitInput.className = `grid-input col-profit ${profitVal < 0 ? 'profit-neg' : 'profit-pos'}`;
+
+        saveData(pId, dateStr, adsVal, depVal, feeVal, wdVal, billVal);
+        updateFooter(pId);
+    }
+
+    function saveData(pId, dateStr, ads, dep, fee, wd, bill) {
+        let data = JSON.parse(localStorage.getItem('fin_data_' + pId) || '[]');
+        let idx = data.findIndex(r => r.date === dateStr);
+        const newObj = { date: dateStr, ads, dep, fee, wd, bill };
+        if (idx > -1) data[idx] = newObj; else data.push(newObj);
+        localStorage.setItem('fin_data_' + pId, JSON.stringify(data));
+    }
+
+    function updateFooter(pId) {
+        const tbody = document.getElementById(`tbody_${pId}`);
+        let sum = { ads:0, dep:0, fee:0, wd:0, profit:0, bill:0 };
+        tbody.querySelectorAll('tr').forEach(tr => {
+            sum.ads += Number(tr.querySelector('.col-ads').value) || 0;
+            sum.dep += Number(tr.querySelector('.col-dep').value) || 0;
+            sum.fee += Number(tr.querySelector('.col-fee').value) || 0;
+            sum.wd += Number(tr.querySelector('.col-wd').value) || 0;
+            sum.bill += Number(tr.querySelector('.col-bill').value) || 0;
+        });
+        sum.profit = sum.dep - (sum.ads + sum.fee + sum.wd);
+        document.getElementById(`sum_ads_${pId}`).innerText = sum.ads.toLocaleString();
+        document.getElementById(`sum_dep_${pId}`).innerText = sum.dep.toLocaleString();
+        document.getElementById(`sum_fee_${pId}`).innerText = sum.fee.toLocaleString();
+        document.getElementById(`sum_wd_${pId}`).innerText = sum.wd.toLocaleString();
+        document.getElementById(`sum_bill_${pId}`).innerText = sum.bill.toLocaleString();
+        const sumProfitEl = document.getElementById(`sum_profit_${pId}`);
+        sumProfitEl.innerText = sum.profit.toLocaleString();
+        sumProfitEl.className = sum.profit < 0 ? 'profit-neg' : 'profit-pos';
+    }
+
+    // --- ส่วนที่แก้ไข: เพิ่มรหัสผ่านตอนบันทึก ---
+    async function uploadToCloud() {
+        // ถามรหัสผ่านก่อนทำรายการ
+        const password = prompt("กรุณาใส่รหัสผ่านเพื่อยืนยันการบันทึกข้อมูล:");
+        
+        if (password !== 'at49') {
+            alert("❌ รหัสผ่านไม่ถูกต้อง! ไม่สามารถบันทึกได้");
+            return;
+        }
+
+        const status = document.getElementById('syncStatus');
+        status.innerText = "⏳ กำลังบันทึกข้อมูล...";
+        
+        let allData = {};
+        PAIRS.forEach(p => {
+            allData[p.id] = JSON.parse(localStorage.getItem('fin_data_' + p.id) || '[]');
+        });
+
+        try {
+            const response = await fetch(CLOUD_URL, {
+                method: 'POST',
+                body: JSON.stringify(allData)
+            });
+            if(response.ok) {
+                status.innerText = "✅ บันทึกแล้วจ้า วัยรุ่น! ";
+                status.style.color = "#10b981";
+                alert("บันทึกข้อมูลเรียบร้อยแล้ว");
+            }
+        } catch (e) {
+            status.innerText = "❌ เกิดข้อผิดพลาดในการบันทึก";
+            status.style.color = "#ef4444";
+        }
+    }
+
+    async function downloadFromCloud() {
+        const status = document.getElementById('syncStatus');
+        status.innerText = "⏳ กำลังดึงข้อมูลล่าสุด...";
+        try {
+            const response = await fetch(CLOUD_URL);
+            const allData = await response.json();
+            Object.keys(allData).forEach(key => {
+                localStorage.setItem('fin_data_' + key, JSON.stringify(allData[key]));
+            });
+            status.innerText = "✅ ดึงข้อมูลสำเร็จ! กำลังรีเฟรช...";
+            status.style.color = "#10b981";
+            setTimeout(() => location.reload(), 1000);
+        } catch (e) {
+            status.innerText = "❌ เกิดข้อผิดพลาดในการดึงข้อมูล";
+            status.style.color = "#ef4444";
+        }
+    }
+
+    function updateDashboard() {
+        let grand = { ads:0, dep:0, fee:0, wd:0, profit:0 };
+        const scores = PAIRS.map(p => {
+            const data = JSON.parse(localStorage.getItem('fin_data_' + p.id) || '[]');
+            let s = { ads:0, dep:0, fee:0, wd:0, profit:0 };
+            data.forEach(r => {
+                const profit = (Number(r.dep)||0) - ((Number(r.ads)||0) + (Number(r.fee)||0) + (Number(r.wd)||0));
+                s.ads += (Number(r.ads)||0); s.dep += (Number(r.dep)||0); s.fee += (Number(r.fee)||0); s.wd += (Number(r.wd)||0); s.profit += profit;
+            });
+            grand.ads += s.ads; grand.dep += s.dep; grand.fee += s.fee; grand.wd += s.wd; grand.profit += s.profit;
+            return { name: p.name, ...s };
+        });
+
+        const sorted = [...scores].sort((a,b) => b.profit - a.profit);
+        document.getElementById('rankList').innerHTML = sorted.map((s, i) => `
+            <div class="rank-card">
+                <div style="width:50px; font-size:24px;">${i+1}</div>
+                <div style="flex-grow:1; font-size:18px;">${s.name}</div>
+                <div style="font-weight:bold; color:#fbbf24; font-size:20px;">${s.profit.toLocaleString()} บาท</div>
+            </div>
+        `).join('');
+
+        document.getElementById('commList').innerHTML = scores.map(s => {
+            let rate = s.profit >= 2500000 ? 0.14 : s.profit >= 1500000 ? 0.12 : s.profit >= 800000 ? 0.10 : s.profit >= 400000 ? 0.08 : 0.06;
+            let total = Math.round(s.profit * rate);
+            return `
+                <div class="comm-box">
+                    <div style="color:#3b82f6; font-weight:bold; margin-bottom:15px; border-bottom:1px solid #334155; padding-bottom:10px;">${s.name}</div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>กำไรสะสม:</span><b>${s.profit.toLocaleString()}</b></div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>เรท:</span><b style="color:#fbbf24">${(rate*100).toFixed(0)}%</b></div>
+                    <div style="background:#0f172a; padding:10px; border-radius:5px; margin-top:10px;">
+                        <div style="display:flex; justify-content:space-between; color:#4ade80; margin-bottom:5px;">
+                            <span>ยอดเต็ม (ยังไม่หาร):</span>
+                            <b>${total.toLocaleString()}</b>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; color:#94a3b8; font-size:13px; border-top:1px dashed #334155; padding-top:5px;">
+                            <span>หาร 2 (คนละ):</span>
+                            <b>${(total/2).toLocaleString()}</b>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        document.getElementById('grandTable').innerHTML = scores.map(s => `
+            <tr>
+                <td style="color:#fbbf24;">${s.name}</td>
+                <td style="text-align:center;">${s.ads.toLocaleString()}</td>
+                <td style="text-align:center;">${s.dep.toLocaleString()}</td>
+                <td style="text-align:center;">${s.fee.toLocaleString()}</td>
+                <td style="text-align:center;">${s.wd.toLocaleString()}</td>
+                <td style="text-align:center; font-weight:bold; color:${s.profit>0?'#4ade80':'#f87171'}">${s.profit.toLocaleString()}</td>
+            </tr>
+        `).join('') + `
+            <tr style="background:#fbbf24; color:black; font-weight:bold; border-top:2px solid white;">
+                <td>TOTAL</td>
+                <td style="text-align:center;">${grand.ads.toLocaleString()}</td>
+                <td style="text-align:center;">${grand.dep.toLocaleString()}</td>
+                <td style="text-align:center;">${grand.fee.toLocaleString()}</td>
+                <td style="text-align:center;">${grand.wd.toLocaleString()}</td>
+                <td style="text-align:center;">${grand.profit.toLocaleString()}</td>
+            </tr>
+        `;
+    }
+</script>
+
+</body>
+</html>
