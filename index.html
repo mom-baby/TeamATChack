@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>Management Dashboard - Centered Logo</title>
+    <title>Management Dashboard - Independent Ads</title>
     <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -37,7 +37,7 @@
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* --- Sync Bar & Centered Logo Styles --- */
+        /* Sync Bar & Centered Logo */
         .sync-bar {
             background: #1e3a8a;
             padding: 20px;
@@ -46,39 +46,35 @@
             display: flex;
             align-items: center;
             border: 1px solid #3b82f6;
-            position: relative; /* จำเป็นสำหรับการจัดวางโลโก้แบบ Absolute */
-            min-height: 120px; /* เพิ่มความสูงให้พอดีกับโลโก้ */
+            position: relative;
+            min-height: 120px;
             overflow: visible;
         }
         
-        /* Logo Styling - Centered */
         .mascot-logo {
-            height: 150px; /* ปรับขนาดโลโก้ใหม่ให้ใหญ่ขึ้น */
+            height: 150px;
             width: auto;
-            position: absolute; /* ดึงออกจาก flow ปกติ */
+            position: absolute;
             left: 50%;
             top: 50%;
-            transform: translate(-50%, -50%); /* จัดกึ่งกลางเป๊ะๆ */
+            transform: translate(-50%, -50%);
             z-index: 10;
-            /* ใช้ filter drop-shadow เพื่อให้แสงเงาตามรูปทรง GIF */
             filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.7));
             transition: transform 0.3s, filter 0.3s;
         }
         .mascot-logo:hover {
-             transform: translate(-50%, -50%) scale(1.1); /* ขยายตอนเอาเมาส์ชี้โดยยังอยู่ตรงกลาง */
+             transform: translate(-50%, -50%) scale(1.1);
              filter: drop-shadow(0 0 25px rgba(59, 130, 246, 1));
         }
 
-        /* ดันเนื้อหาปุ่มไปทางซ้ายไม่ให้ทับโลโก้ */
         .sync-content-left {
             position: relative;
             z-index: 5;
-            padding-right: 160px; /* เว้นที่ว่างเผื่อโลโก้ */
+            padding-right: 160px;
         }
 
         .controls-bar { background: var(--card-bg); padding: 15px; border-radius: 10px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; border: 1px solid var(--border-color); }
 
-        /* Team Name Input */
         .team-name-input {
             background: transparent;
             border: none;
@@ -91,16 +87,13 @@
             padding: 5px;
             outline: none;
         }
-        .team-name-input:focus { border-bottom-style: solid; background: #334155; border-radius: 4px; }
 
-        /* Grid Table Styling */
         table { width: 100%; border-collapse: collapse; background: var(--card-bg); border-radius: 8px; overflow: hidden; }
         th { background: #0f172a; padding: 12px 5px; color: #94a3b8; border: 1px solid var(--border-color); font-size: 13px; white-space: nowrap; }
         td { border: 1px solid var(--border-color); padding: 0; }
         
         .grid-input { width: 100%; height: 100%; padding: 10px; background: transparent; border: none; color: white; text-align: center; font-family: 'Mitr'; font-size: 14px; outline: none; box-sizing: border-box; }
         .grid-input:focus { background: #1e3a8a; box-shadow: inset 0 0 0 2px #3b82f6; }
-        
         .grid-input[readonly] { cursor: default; font-weight: bold; }
         .date-col { background: #0f172a; color: #94a3b8; text-align: center; font-size: 13px; width: 100px; }
         
@@ -119,7 +112,7 @@
 <div class="container">
     <div class="sync-bar">
         <div class="sync-content-left">
-            <strong style="color: white; display:block; margin-bottom:5px; font-size: 1.2em;">🌐 ตารางรวมยอดทีม AT งับ</strong>
+            <strong style="color: white; display:block; margin-bottom:5px; font-size: 1.2em;">🌐 ตารางรวมยอดทีม AT งับ (แยกค่าแอดแล้วนะ)</strong>
             <div style="margin-top: 10px;">
                 <button class="tab-btn" onclick="uploadToCloud()" style="background: #10b981; color: white; padding: 12px 25px; font-size: 1em;">⬆️ บันทึกข้อมูลงับ</button>
                 <button class="tab-btn" onclick="downloadFromCloud()" style="background: #f59e0b; color: white; padding: 12px 25px; font-size: 1em;">⬇️ ดึงข้อมูลล่าสุดงับ</button>
@@ -155,13 +148,11 @@
     </div>
 
     <div id="teamContainer"></div>
-
 </div>
 
 <script>
     const CLOUD_URL = 'https://script.google.com/macros/s/AKfycbyknJSDgrQMoFMjQQdTWRaX9fmYQ3rdYl5bjnoS-w4ZDtxthOQKXbKe71EAa2v6sjUe/exec';
 
-    // Default Names
     const PAIRS = [
         { id: 'p1', defaultName: '宝宝 - 冬冬' },
         { id: 'p2', defaultName: '阿山 - 阿宁' },
@@ -172,7 +163,6 @@
     let currentGlobalMonth = new Date().toISOString().slice(0, 7);
     const container = document.getElementById('teamContainer');
 
-    // Create HTML for each team
     PAIRS.forEach(p => {
         container.innerHTML += `
             <div id="${p.id}" class="tab-content">
@@ -188,7 +178,7 @@
                     <thead>
                         <tr>
                             <th class="date-col">วันที่</th>
-                            <th>ค่าแอท (Auto Sync)</th>
+                            <th>ค่าแอท</th>
                             <th>ยอดฝาก</th>
                             <th>ธรรมเนียม (32%)</th>
                             <th>ยอดถอน</th>
@@ -224,13 +214,12 @@
     function refreshAll() {
         PAIRS.forEach(p => {
             renderTable(p.id);
-            updateNameInput(p.id); // Load name for this month
+            updateNameInput(p.id);
         });
-        updateTabButtons(); // Update tab names
+        updateTabButtons();
         updateDashboard();
     }
 
-    // --- Name Management System ---
     function getTeamName(pId) {
         const config = JSON.parse(localStorage.getItem('team_config') || '{}');
         if (config[currentGlobalMonth] && config[currentGlobalMonth][pId]) {
@@ -259,7 +248,6 @@
         });
     }
 
-    // --- Core Functions ---
     function switchTab(id) {
         document.querySelectorAll('.tab-content, .tab-btn').forEach(el => el.classList.remove('active'));
         document.getElementById(id).classList.add('active');
@@ -309,10 +297,8 @@
 
     function handleInput(pId, dateStr) {
         const row = document.querySelector(`#tbody_${pId} tr[data-date="${dateStr}"]`);
-        const activeEl = document.activeElement;
-        const isAdsInput = activeEl && activeEl.classList.contains('col-ads');
         
-        let adsVal = Number(row.querySelector('.col-ads').value) || 0;
+        const adsVal = Number(row.querySelector('.col-ads').value) || 0;
         const depVal = Number(row.querySelector('.col-dep').value) || 0;
         const wdVal = Number(row.querySelector('.col-wd').value) || 0;
         const billVal = row.querySelector('.col-bill').value; 
@@ -327,35 +313,8 @@
 
         saveData(pId, dateStr, adsVal, depVal, feeVal, wdVal, billVal);
         updateFooter(pId);
-
-        if (isAdsInput) {
-            syncAdsToAllPairs(dateStr, adsVal, pId);
-        }
-    }
-
-    function syncAdsToAllPairs(dateStr, newAdsVal, sourcePid) {
-        PAIRS.forEach(p => {
-            if (p.id === sourcePid) return;
-            let data = JSON.parse(localStorage.getItem('fin_data_' + p.id) || '[]');
-            let idx = data.findIndex(r => r.date === dateStr);
-            let currentObj = idx > -1 ? data[idx] : { date: dateStr, dep:0, fee:0, wd:0, bill:'' };
-            currentObj.ads = newAdsVal;
-            if (idx > -1) data[idx] = currentObj; else data.push(currentObj);
-            localStorage.setItem('fin_data_' + p.id, JSON.stringify(data));
-
-            const otherRow = document.querySelector(`#tbody_${p.id} tr[data-date="${dateStr}"]`);
-            if (otherRow) {
-                otherRow.querySelector('.col-ads').value = newAdsVal;
-                const dep = Number(currentObj.dep) || 0;
-                const fee = Number(currentObj.fee) || 0;
-                const wd = Number(currentObj.wd) || 0;
-                const otherProfit = dep - (newAdsVal + fee + wd);
-                const pInput = otherRow.querySelector('.col-profit');
-                pInput.value = otherProfit.toLocaleString();
-                pInput.className = `grid-input col-profit ${otherProfit < 0 ? 'profit-neg' : 'profit-pos'}`;
-                updateFooter(p.id);
-            }
-        });
+        
+        // ฟังก์ชัน syncAdsToAllPairs ถูกนำออกไปแล้ว เพื่อให้ค่าแอดเป็นอิสระต่อกัน
     }
 
     function saveData(pId, dateStr, ads, dep, fee, wd, bill) {
@@ -401,7 +360,6 @@
         PAIRS.forEach(p => {
             allData[p.id] = JSON.parse(localStorage.getItem('fin_data_' + p.id) || '[]');
         });
-        // เพิ่มการบันทึกชื่อทีม
         allData['team_config'] = JSON.parse(localStorage.getItem('team_config') || '{}');
 
         try {
@@ -447,7 +405,7 @@
 
         let grand = { ads:0, dep:0, fee:0, wd:0, profit:0 };
         const scores = PAIRS.map(p => {
-            const currentName = getTeamName(p.id); // ใช้ชื่อตามเดือนปัจจุบัน
+            const currentName = getTeamName(p.id);
             const data = JSON.parse(localStorage.getItem('fin_data_' + p.id) || '[]');
             const monthData = data.filter(r => r.date.startsWith(currentGlobalMonth));
 
