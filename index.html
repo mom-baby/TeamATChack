@@ -119,12 +119,12 @@
 <div class="container">
     <div class="sync-bar">
         <div class="sync-content-left">
-            <strong style="color: white; display:block; margin-bottom:5px; font-size: 1.2em;">🌐 ตารางรวมยอดทีม AT System</strong>
+            <strong style="color: white; display:block; margin-bottom:5px; font-size: 1.2em;">🌐 ตารางรวมยอดทีม AT งับ</strong>
             <div style="margin-top: 10px;">
-                <button class="tab-btn" onclick="uploadToCloud()" style="background: #10b981; color: white; padding: 12px 25px; font-size: 1em;">⬆️ บันทึกข้อมูล</button>
-                <button class="tab-btn" onclick="downloadFromCloud()" style="background: #f59e0b; color: white; padding: 12px 25px; font-size: 1em;">⬇️ ดึงข้อมูลล่าสุด</button>
+                <button class="tab-btn" onclick="uploadToCloud()" style="background: #10b981; color: white; padding: 12px 25px; font-size: 1em;">⬆️ บันทึกข้อมูลงับ</button>
+                <button class="tab-btn" onclick="downloadFromCloud()" style="background: #f59e0b; color: white; padding: 12px 25px; font-size: 1em;">⬇️ ดึงข้อมูลล่าสุดงับ</button>
             </div>
-            <div id="syncStatus" style="font-size: 14px; color: #cbd5e1; margin-top: 10px; font-style: italic;">👉 กรุณากด "ดึงข้อมูลล่าสุด" ก่อนเริ่มใช้งานทุกครั้ง</div>
+            <div id="syncStatus" style="font-size: 14px; color: #cbd5e1; margin-top: 10px; font-style: italic;">👉 กด "ดึงข้อมูลล่าสุด" ก่อนนะต่ะเอง </div>
         </div>
         <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExeGRoZ3F6OXR5dW92YzU5bWJ3NGE1dHJ4YXdpMGpyNHhtdDlibWVpcyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/oSOvGVxgijmB5sHHHb/giphy.gif" class="mascot-logo" alt="Logo">
     </div>
@@ -143,11 +143,11 @@
     </div>
 
     <div id="ranking" class="tab-content active">
-        <h2>🥇 อันดับกำไร <span id="dashMonthLabel" style="color:var(--accent-gold)"></span></h2>
+        <h2>🥇 อันดับกำไรของสมาชิกในทีม AT <span id="dashMonthLabel" style="color:var(--accent-gold)"></span></h2>
         <div id="rankList"></div>
-        <h2 style="margin-top:30px;">💰 ค่าคอมฯ (คำนวณจากยอดเดือนที่เลือก)</h2>
+        <h2 style="margin-top:30px;">💰 อันนี้ค่าคอมงับ </h2>
         <div id="commList" class="comm-grid"></div>
-        <h2 style="margin-top:30px;">📊 ภาพรวมทั้งหมด</h2>
+        <h2 style="margin-top:30px;">📊 รวมๆทั้งหมดงับ </h2>
         <table style="margin-top:10px;">
             <thead><tr><th>ทีม</th><th>ค่าแอท</th><th>ยอดฝาก</th><th>ธรรมเนียม</th><th>ยอดถอน</th><th>กำไรสุทธิ</th></tr></thead>
             <tbody id="grandTable"></tbody>
@@ -180,7 +180,7 @@
                     <div style="display:flex; align-items:center; gap:10px;">
                         <h3>👤 ทีม:</h3>
                         <input type="text" id="nameInput_${p.id}" class="team-name-input" 
-                               placeholder="ตั้งชื่อทีม..." 
+                               placeholder="ตั้งชื่อทีมได้เลยน๊าตัวเอง..." 
                                oninput="handleNameChange('${p.id}', this.value)">
                     </div>
                 </div>
@@ -192,7 +192,7 @@
                             <th>ยอดฝาก</th>
                             <th>ธรรมเนียม (32%)</th>
                             <th>ยอดถอน</th>
-                            <th>เปิดบิล</th>
+                            <th>บิลเชือด</th>
                             <th>กำไร</th> </tr>
                     </thead>
                     <tbody id="tbody_${p.id}"></tbody>
@@ -388,14 +388,14 @@
     }
 
     async function uploadToCloud() {
-        const password = prompt("กรุณาใส่รหัสผ่านเพื่อยืนยันการบันทึกข้อมูล:");
+        const password = prompt("ถ้าอยากบันทึก ต้องใส่รหัสผ่านก่อนน๊าตัวเอง:");
         if (password !== 'at49') {
-            alert("❌ รหัสผ่านไม่ถูกต้อง!");
+            alert("❌ รหัสผ่านไม่ถูกต้องน๊าา อย่ามั่วได้มั๊ย ");
             return;
         }
 
         const status = document.getElementById('syncStatus');
-        status.innerText = "⏳ กำลังบันทึกข้อมูล...";
+        status.innerText = "⏳ เค้ากำลังบันทึกข้อมูลน๊าาา รอแป๊ป...";
         
         let allData = {};
         PAIRS.forEach(p => {
@@ -410,19 +410,19 @@
                 body: JSON.stringify(allData)
             });
             if(response.ok) {
-                status.innerText = "✅ บันทึกสำเร็จ!";
+                status.innerText = "✅ บันทึกแล้วน๊าตัวเอง";
                 status.style.color = "#10b981";
-                alert("บันทึกข้อมูลเรียบร้อยแล้ว");
+                alert("บันทึกข้อมูลแล้วน๊าจุ๊บ😘");
             }
         } catch (e) {
-            status.innerText = "❌ เกิดข้อผิดพลาดในการบันทึก";
+            status.innerText = "❌ เกิดข้อผิดพลาดในการบันทึกง่าา ";
             status.style.color = "#ef4444";
         }
     }
 
     async function downloadFromCloud() {
         const status = document.getElementById('syncStatus');
-        status.innerText = "⏳ กำลังดึงข้อมูลล่าสุด...";
+        status.innerText = "⏳ เค้ากำลังดึงข้อมูลให้น๊าตัวเอง...";
         try {
             const response = await fetch(CLOUD_URL);
             const allData = await response.json();
@@ -433,11 +433,11 @@
                     localStorage.setItem('fin_data_' + key, JSON.stringify(allData[key]));
                 }
             });
-            status.innerText = "✅ ดึงข้อมูลสำเร็จ! รีเฟรช...";
+            status.innerText = "✅ เค้าดึงข้อมูลแล้วน๊าตัวเอง! รีเฟรช...";
             status.style.color = "#10b981";
             setTimeout(() => location.reload(), 1500);
         } catch (e) {
-            status.innerText = "❌ เกิดข้อผิดพลาดในการดึงข้อมูล";
+            status.innerText = "❌ เกิดข้อผิดพลาดในการดึงข้อมูลง่าา";
             status.style.color = "#ef4444";
         }
     }
