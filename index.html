@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>Management Dashboard - Cloud Sync Enabled</title>
+    <title>Management Dashboard - Centered Logo</title>
     <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -22,68 +22,130 @@
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
 
-        .tabs-nav { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; }
+        /* Tabs Nav */
+        .tabs-nav { display: flex; align-items: center; gap: 10px; margin-bottom: 25px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; flex-wrap: wrap; }
+        
         .tab-btn { padding: 10px 20px; border: none; background: #334155; color: #94a3b8; cursor: pointer; border-radius: 6px; font-family: 'Mitr'; transition: 0.2s; }
         .tab-btn.active { background: var(--accent-blue); color: white; }
         .tab-rank.active { background: var(--accent-gold); color: black; font-weight: bold; }
+
+        /* Global Month Picker Style */
+        .global-date-picker { margin-left: auto; display: flex; align-items: center; gap: 10px; background: var(--card-bg); padding: 5px 15px; border-radius: 8px; border: 1px solid var(--accent-gold); }
+        input[type="month"] { background: #0f172a; border: 1px solid #3b82f6; color: white; padding: 5px 10px; border-radius: 5px; font-family: 'Mitr'; cursor: pointer; font-size: 16px; }
 
         .tab-content { display: none; animation: fadeIn 0.3s ease; }
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Cloud Sync Bar */
-        .sync-bar { background: #1e3a8a; padding: 15px; border-radius: 10px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; border: 1px solid #3b82f6; }
+        /* --- Sync Bar & Centered Logo Styles --- */
+        .sync-bar {
+            background: #1e3a8a;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            border: 1px solid #3b82f6;
+            position: relative; /* จำเป็นสำหรับการจัดวางโลโก้แบบ Absolute */
+            min-height: 120px; /* เพิ่มความสูงให้พอดีกับโลโก้ */
+            overflow: visible;
+        }
+        
+        /* Logo Styling - Centered */
+        .mascot-logo {
+            height: 150px; /* ปรับขนาดโลโก้ใหม่ให้ใหญ่ขึ้น */
+            width: auto;
+            position: absolute; /* ดึงออกจาก flow ปกติ */
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%); /* จัดกึ่งกลางเป๊ะๆ */
+            z-index: 10;
+            /* ใช้ filter drop-shadow เพื่อให้แสงเงาตามรูปทรง GIF */
+            filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.7));
+            transition: transform 0.3s, filter 0.3s;
+        }
+        .mascot-logo:hover {
+             transform: translate(-50%, -50%) scale(1.1); /* ขยายตอนเอาเมาส์ชี้โดยยังอยู่ตรงกลาง */
+             filter: drop-shadow(0 0 25px rgba(59, 130, 246, 1));
+        }
+
+        /* ดันเนื้อหาปุ่มไปทางซ้ายไม่ให้ทับโลโก้ */
+        .sync-content-left {
+            position: relative;
+            z-index: 5;
+            padding-right: 160px; /* เว้นที่ว่างเผื่อโลโก้ */
+        }
 
         .controls-bar { background: var(--card-bg); padding: 15px; border-radius: 10px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; border: 1px solid var(--border-color); }
-        input[type="month"] { background: #0f172a; border: 1px solid #3b82f6; color: white; padding: 8px 15px; border-radius: 5px; font-family: 'Mitr'; cursor: pointer; }
+
+        /* Team Name Input */
+        .team-name-input {
+            background: transparent;
+            border: none;
+            border-bottom: 2px dashed var(--accent-gold);
+            color: var(--accent-gold);
+            font-size: 1.17em;
+            font-weight: bold;
+            font-family: 'Mitr';
+            width: 200px;
+            padding: 5px;
+            outline: none;
+        }
+        .team-name-input:focus { border-bottom-style: solid; background: #334155; border-radius: 4px; }
 
         /* Grid Table Styling */
         table { width: 100%; border-collapse: collapse; background: var(--card-bg); border-radius: 8px; overflow: hidden; }
         th { background: #0f172a; padding: 12px 5px; color: #94a3b8; border: 1px solid var(--border-color); font-size: 13px; white-space: nowrap; }
         td { border: 1px solid var(--border-color); padding: 0; }
         
-        .grid-input { width: 100%; height: 100%; padding: 10px; background: transparent; border: none; color: white; text-align: center; font-family: 'Mitr'; font-size: 14px; outline: none; }
+        .grid-input { width: 100%; height: 100%; padding: 10px; background: transparent; border: none; color: white; text-align: center; font-family: 'Mitr'; font-size: 14px; outline: none; box-sizing: border-box; }
         .grid-input:focus { background: #1e3a8a; box-shadow: inset 0 0 0 2px #3b82f6; }
-        .grid-input::placeholder { color: #475569; font-size: 12px; }
         
         .grid-input[readonly] { cursor: default; font-weight: bold; }
         .date-col { background: #0f172a; color: #94a3b8; text-align: center; font-size: 13px; width: 100px; }
         
-        /* Footer Styling */
         .sum-row td { background: #0f172a; color: var(--accent-gold); font-weight: bold; padding: 12px 5px; text-align: center; font-size: 14px; border-top: 2px solid var(--accent-gold); }
 
-        /* Dashboard Styles */
         .rank-card { display: flex; align-items: center; padding: 15px; background: var(--card-bg); margin-bottom: 10px; border-radius: 8px; border-left: 5px solid var(--accent-gold); }
         .comm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-top: 20px; }
         .comm-box { background: var(--card-bg); padding: 20px; border-radius: 8px; border: 1px solid var(--border-color); }
         
         .profit-pos { color: var(--accent-green); }
         .profit-neg { color: var(--accent-red); }
-
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="sync-bar">
-        <strong style="color: white;">🌐ตารางรวมยอดทีม AT :</strong>
-        <button class="tab-btn" onclick="uploadToCloud()" style="background: #10b981; color: white;">⬆️ บันทึก</button>
-        <button class="tab-btn" onclick="downloadFromCloud()" style="background: #f59e0b; color: white;">⬇️ ดึงข้อมูลล่าสุด</button>
-        <span id="syncStatus" style="font-size: 13px; color: #cbd5e1; margin-left: 10px;">กรุณากด "ดึงข้อมูลล่าสุด" ก่อนเริ่มใช้งาน</span>
+        <div class="sync-content-left">
+            <strong style="color: white; display:block; margin-bottom:5px; font-size: 1.2em;">🌐 ตารางรวมยอดทีม AT System</strong>
+            <div style="margin-top: 10px;">
+                <button class="tab-btn" onclick="uploadToCloud()" style="background: #10b981; color: white; padding: 12px 25px; font-size: 1em;">⬆️ บันทึกข้อมูล</button>
+                <button class="tab-btn" onclick="downloadFromCloud()" style="background: #f59e0b; color: white; padding: 12px 25px; font-size: 1em;">⬇️ ดึงข้อมูลล่าสุด</button>
+            </div>
+            <div id="syncStatus" style="font-size: 14px; color: #cbd5e1; margin-top: 10px; font-style: italic;">👉 กรุณากด "ดึงข้อมูลล่าสุด" ก่อนเริ่มใช้งานทุกครั้ง</div>
+        </div>
+        <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExeGRoZ3F6OXR5dW92YzU5bWJ3NGE1dHJ4YXdpMGpyNHhtdDlibWVpcyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/oSOvGVxgijmB5sHHHb/giphy.gif" class="mascot-logo" alt="Logo">
     </div>
 
     <div class="tabs-nav">
         <button class="tab-btn tab-rank active" onclick="switchTab('ranking')">🏆 DASHBOARD</button>
-        <button class="tab-btn" onclick="switchTab('p1')">宝宝 - 冬冬</button>
-        <button class="tab-btn" onclick="switchTab('p2')">阿山 - 阿宁</button>
-        <button class="tab-btn" onclick="switchTab('p3')">好运 - 阿特</button>
-        <button class="tab-btn" onclick="switchTab('p4')">UX - 阿瓜</button>
+        <button id="btn_p1" class="tab-btn" onclick="switchTab('p1')">P1</button>
+        <button id="btn_p2" class="tab-btn" onclick="switchTab('p2')">P2</button>
+        <button id="btn_p3" class="tab-btn" onclick="switchTab('p3')">P3</button>
+        <button id="btn_p4" class="tab-btn" onclick="switchTab('p4')">P4</button>
+
+        <div class="global-date-picker">
+            <label style="color: #fbbf24; font-weight: bold;">📅 เดือน:</label>
+            <input type="month" id="globalMonthPicker" onchange="onGlobalMonthChange()">
+        </div>
     </div>
 
     <div id="ranking" class="tab-content active">
-        <h2>🥇 อันดับกำไรสะสม (All Time)</h2>
+        <h2>🥇 อันดับกำไร <span id="dashMonthLabel" style="color:var(--accent-gold)"></span></h2>
         <div id="rankList"></div>
-        <h2 style="margin-top:30px;">💰 สรุปค่าคอมมิชชัน</h2>
+        <h2 style="margin-top:30px;">💰 ค่าคอมฯ (คำนวณจากยอดเดือนที่เลือก)</h2>
         <div id="commList" class="comm-grid"></div>
         <h2 style="margin-top:30px;">📊 ภาพรวมทั้งหมด</h2>
         <table style="margin-top:10px;">
@@ -99,31 +161,34 @@
 <script>
     const CLOUD_URL = 'https://script.google.com/macros/s/AKfycbyknJSDgrQMoFMjQQdTWRaX9fmYQ3rdYl5bjnoS-w4ZDtxthOQKXbKe71EAa2v6sjUe/exec';
 
+    // Default Names
     const PAIRS = [
-        { id: 'p1', name: '宝宝 - 冬冬' },
-        { id: 'p2', name: '阿山 - 阿宁' },
-        { id: 'p3', name: '好运 - 阿特' },
-        { id: 'p4', name: 'UX - 阿瓜' }
+        { id: 'p1', defaultName: '宝宝 - 冬冬' },
+        { id: 'p2', defaultName: '阿山 - 阿宁' },
+        { id: 'p3', defaultName: '好运 - 阿特' },
+        { id: 'p4', defaultName: 'UX - 阿瓜' }
     ];
 
-    const currentMonth = new Date().toISOString().slice(0, 7);
+    let currentGlobalMonth = new Date().toISOString().slice(0, 7);
     const container = document.getElementById('teamContainer');
 
+    // Create HTML for each team
     PAIRS.forEach(p => {
         container.innerHTML += `
             <div id="${p.id}" class="tab-content">
                 <div class="controls-bar">
-                    <h3>👤 ทีม: ${p.name}</h3>
-                    <div style="margin-left:auto; display:flex; align-items:center; gap:10px;">
-                        <label>เลือกเดือน:</label>
-                        <input type="month" id="month_${p.id}" value="${currentMonth}" onchange="renderTable('${p.id}')">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <h3>👤 ทีม:</h3>
+                        <input type="text" id="nameInput_${p.id}" class="team-name-input" 
+                               placeholder="ตั้งชื่อทีม..." 
+                               oninput="handleNameChange('${p.id}', this.value)">
                     </div>
                 </div>
                 <table>
                     <thead>
                         <tr>
                             <th class="date-col">วันที่</th>
-                            <th>ค่าแอท</th>
+                            <th>ค่าแอท (Auto Sync)</th>
                             <th>ยอดฝาก</th>
                             <th>ธรรมเนียม (32%)</th>
                             <th>ยอดถอน</th>
@@ -132,8 +197,8 @@
                     </thead>
                     <tbody id="tbody_${p.id}"></tbody>
                     <tfoot id="tfoot_${p.id}">
-                        <tr class="sum-row" id="sumRow_${p.id}">
-                            <td>รวมเดือนนี้</td>
+                        <tr class="sum-row">
+                            <td>รวม</td>
                             <td id="sum_ads_${p.id}">0</td>
                             <td id="sum_dep_${p.id}">0</td>
                             <td id="sum_fee_${p.id}">0</td>
@@ -147,20 +212,63 @@
     });
 
     window.onload = () => {
-        PAIRS.forEach(p => renderTable(p.id));
-        updateDashboard();
+        document.getElementById('globalMonthPicker').value = currentGlobalMonth;
+        refreshAll();
     };
 
+    function onGlobalMonthChange() {
+        currentGlobalMonth = document.getElementById('globalMonthPicker').value;
+        refreshAll();
+    }
+
+    function refreshAll() {
+        PAIRS.forEach(p => {
+            renderTable(p.id);
+            updateNameInput(p.id); // Load name for this month
+        });
+        updateTabButtons(); // Update tab names
+        updateDashboard();
+    }
+
+    // --- Name Management System ---
+    function getTeamName(pId) {
+        const config = JSON.parse(localStorage.getItem('team_config') || '{}');
+        if (config[currentGlobalMonth] && config[currentGlobalMonth][pId]) {
+            return config[currentGlobalMonth][pId];
+        }
+        return PAIRS.find(p => p.id === pId).defaultName;
+    }
+
+    function handleNameChange(pId, newName) {
+        let config = JSON.parse(localStorage.getItem('team_config') || '{}');
+        if (!config[currentGlobalMonth]) config[currentGlobalMonth] = {};
+        config[currentGlobalMonth][pId] = newName;
+        localStorage.setItem('team_config', JSON.stringify(config));
+        updateTabButtons();
+        updateDashboard();
+    }
+
+    function updateNameInput(pId) {
+        document.getElementById(`nameInput_${pId}`).value = getTeamName(pId);
+    }
+
+    function updateTabButtons() {
+        PAIRS.forEach(p => {
+            const btn = document.getElementById(`btn_${p.id}`);
+            if(btn) btn.innerText = getTeamName(p.id);
+        });
+    }
+
+    // --- Core Functions ---
     function switchTab(id) {
         document.querySelectorAll('.tab-content, .tab-btn').forEach(el => el.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        if(event) event.currentTarget.classList.add('active');
+        if(event && event.currentTarget) event.currentTarget.classList.add('active');
         if(id === 'ranking') updateDashboard();
     }
 
     function renderTable(pId) {
-        const monthVal = document.getElementById(`month_${pId}`).value;
-        const [year, month] = monthVal.split('-').map(Number);
+        const [year, month] = currentGlobalMonth.split('-').map(Number);
         const daysInMonth = new Date(year, month, 0).getDate();
         const tbody = document.getElementById(`tbody_${pId}`);
         const allData = JSON.parse(localStorage.getItem('fin_data_' + pId) || '[]');
@@ -201,7 +309,10 @@
 
     function handleInput(pId, dateStr) {
         const row = document.querySelector(`#tbody_${pId} tr[data-date="${dateStr}"]`);
-        const adsVal = Number(row.querySelector('.col-ads').value) || 0;
+        const activeEl = document.activeElement;
+        const isAdsInput = activeEl && activeEl.classList.contains('col-ads');
+        
+        let adsVal = Number(row.querySelector('.col-ads').value) || 0;
         const depVal = Number(row.querySelector('.col-dep').value) || 0;
         const wdVal = Number(row.querySelector('.col-wd').value) || 0;
         const billVal = row.querySelector('.col-bill').value; 
@@ -216,6 +327,35 @@
 
         saveData(pId, dateStr, adsVal, depVal, feeVal, wdVal, billVal);
         updateFooter(pId);
+
+        if (isAdsInput) {
+            syncAdsToAllPairs(dateStr, adsVal, pId);
+        }
+    }
+
+    function syncAdsToAllPairs(dateStr, newAdsVal, sourcePid) {
+        PAIRS.forEach(p => {
+            if (p.id === sourcePid) return;
+            let data = JSON.parse(localStorage.getItem('fin_data_' + p.id) || '[]');
+            let idx = data.findIndex(r => r.date === dateStr);
+            let currentObj = idx > -1 ? data[idx] : { date: dateStr, dep:0, fee:0, wd:0, bill:'' };
+            currentObj.ads = newAdsVal;
+            if (idx > -1) data[idx] = currentObj; else data.push(currentObj);
+            localStorage.setItem('fin_data_' + p.id, JSON.stringify(data));
+
+            const otherRow = document.querySelector(`#tbody_${p.id} tr[data-date="${dateStr}"]`);
+            if (otherRow) {
+                otherRow.querySelector('.col-ads').value = newAdsVal;
+                const dep = Number(currentObj.dep) || 0;
+                const fee = Number(currentObj.fee) || 0;
+                const wd = Number(currentObj.wd) || 0;
+                const otherProfit = dep - (newAdsVal + fee + wd);
+                const pInput = otherRow.querySelector('.col-profit');
+                pInput.value = otherProfit.toLocaleString();
+                pInput.className = `grid-input col-profit ${otherProfit < 0 ? 'profit-neg' : 'profit-pos'}`;
+                updateFooter(p.id);
+            }
+        });
     }
 
     function saveData(pId, dateStr, ads, dep, fee, wd, bill) {
@@ -247,13 +387,10 @@
         sumProfitEl.className = sum.profit < 0 ? 'profit-neg' : 'profit-pos';
     }
 
-    // --- ส่วนที่แก้ไข: เพิ่มรหัสผ่านตอนบันทึก ---
     async function uploadToCloud() {
-        // ถามรหัสผ่านก่อนทำรายการ
         const password = prompt("กรุณาใส่รหัสผ่านเพื่อยืนยันการบันทึกข้อมูล:");
-        
         if (password !== 'at49') {
-            alert("❌ รหัสผ่านไม่ถูกต้อง! ไม่สามารถบันทึกได้");
+            alert("❌ รหัสผ่านไม่ถูกต้อง!");
             return;
         }
 
@@ -264,6 +401,8 @@
         PAIRS.forEach(p => {
             allData[p.id] = JSON.parse(localStorage.getItem('fin_data_' + p.id) || '[]');
         });
+        // เพิ่มการบันทึกชื่อทีม
+        allData['team_config'] = JSON.parse(localStorage.getItem('team_config') || '{}');
 
         try {
             const response = await fetch(CLOUD_URL, {
@@ -271,7 +410,7 @@
                 body: JSON.stringify(allData)
             });
             if(response.ok) {
-                status.innerText = "✅ บันทึกแล้วจ้า วัยรุ่น! ";
+                status.innerText = "✅ บันทึกสำเร็จ!";
                 status.style.color = "#10b981";
                 alert("บันทึกข้อมูลเรียบร้อยแล้ว");
             }
@@ -288,11 +427,15 @@
             const response = await fetch(CLOUD_URL);
             const allData = await response.json();
             Object.keys(allData).forEach(key => {
-                localStorage.setItem('fin_data_' + key, JSON.stringify(allData[key]));
+                if(key === 'team_config') {
+                    localStorage.setItem('team_config', JSON.stringify(allData[key]));
+                } else {
+                    localStorage.setItem('fin_data_' + key, JSON.stringify(allData[key]));
+                }
             });
-            status.innerText = "✅ ดึงข้อมูลสำเร็จ! กำลังรีเฟรช...";
+            status.innerText = "✅ ดึงข้อมูลสำเร็จ! รีเฟรช...";
             status.style.color = "#10b981";
-            setTimeout(() => location.reload(), 1000);
+            setTimeout(() => location.reload(), 1500);
         } catch (e) {
             status.innerText = "❌ เกิดข้อผิดพลาดในการดึงข้อมูล";
             status.style.color = "#ef4444";
@@ -300,16 +443,21 @@
     }
 
     function updateDashboard() {
+        document.getElementById('dashMonthLabel').innerText = `(เดือน: ${currentGlobalMonth})`;
+
         let grand = { ads:0, dep:0, fee:0, wd:0, profit:0 };
         const scores = PAIRS.map(p => {
+            const currentName = getTeamName(p.id); // ใช้ชื่อตามเดือนปัจจุบัน
             const data = JSON.parse(localStorage.getItem('fin_data_' + p.id) || '[]');
+            const monthData = data.filter(r => r.date.startsWith(currentGlobalMonth));
+
             let s = { ads:0, dep:0, fee:0, wd:0, profit:0 };
-            data.forEach(r => {
+            monthData.forEach(r => {
                 const profit = (Number(r.dep)||0) - ((Number(r.ads)||0) + (Number(r.fee)||0) + (Number(r.wd)||0));
                 s.ads += (Number(r.ads)||0); s.dep += (Number(r.dep)||0); s.fee += (Number(r.fee)||0); s.wd += (Number(r.wd)||0); s.profit += profit;
             });
             grand.ads += s.ads; grand.dep += s.dep; grand.fee += s.fee; grand.wd += s.wd; grand.profit += s.profit;
-            return { name: p.name, ...s };
+            return { name: currentName, ...s };
         });
 
         const sorted = [...scores].sort((a,b) => b.profit - a.profit);
@@ -327,15 +475,15 @@
             return `
                 <div class="comm-box">
                     <div style="color:#3b82f6; font-weight:bold; margin-bottom:15px; border-bottom:1px solid #334155; padding-bottom:10px;">${s.name}</div>
-                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>กำไรสะสม:</span><b>${s.profit.toLocaleString()}</b></div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>กำไรสุทธิ:</span><b>${s.profit.toLocaleString()}</b></div>
                     <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>เรท:</span><b style="color:#fbbf24">${(rate*100).toFixed(0)}%</b></div>
                     <div style="background:#0f172a; padding:10px; border-radius:5px; margin-top:10px;">
                         <div style="display:flex; justify-content:space-between; color:#4ade80; margin-bottom:5px;">
-                            <span>ยอดเต็ม (ยังไม่หาร):</span>
+                            <span>ยอดเต็ม:</span>
                             <b>${total.toLocaleString()}</b>
                         </div>
                         <div style="display:flex; justify-content:space-between; color:#94a3b8; font-size:13px; border-top:1px dashed #334155; padding-top:5px;">
-                            <span>หาร 2 (คนละ):</span>
+                            <span>หาร 2:</span>
                             <b>${(total/2).toLocaleString()}</b>
                         </div>
                     </div>
