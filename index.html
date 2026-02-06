@@ -128,6 +128,7 @@
         <button id="btn_p2" class="tab-btn" onclick="switchTab('p2')">P2</button>
         <button id="btn_p3" class="tab-btn" onclick="switchTab('p3')">P3</button>
         <button id="btn_p4" class="tab-btn" onclick="switchTab('p4')">P4</button>
+        <button id="btn_p5" class="tab-btn" onclick="switchTab('p5')">P5</button>
 
         <div class="global-date-picker">
             <label style="color: #fbbf24; font-weight: bold;">📅 เดือน:</label>
@@ -157,7 +158,8 @@
         { id: 'p1', defaultName: '宝宝 - 冬冬' },
         { id: 'p2', defaultName: '阿山 - 阿宁' },
         { id: 'p3', defaultName: '好运 - 阿特' },
-        { id: 'p4', defaultName: 'UX - 阿瓜' }
+        { id: 'p4', defaultName: 'UX - 阿瓜' },
+        { id: 'p5', defaultName: 'ว่าง' }
     ];
 
     let currentGlobalMonth = new Date().toISOString().slice(0, 7);
@@ -313,8 +315,6 @@
 
         saveData(pId, dateStr, adsVal, depVal, feeVal, wdVal, billVal);
         updateFooter(pId);
-        
-        // ฟังก์ชัน syncAdsToAllPairs ถูกนำออกไปแล้ว เพื่อให้ค่าแอดเป็นอิสระต่อกัน
     }
 
     function saveData(pId, dateStr, ads, dep, fee, wd, bill) {
@@ -404,21 +404,41 @@
         document.getElementById('dashMonthLabel').innerText = `(เดือน: ${currentGlobalMonth})`;
 
         let grand = { ads:0, dep:0, fee:0, wd:0, profit:0 };
+        
+        // กรองเอาเฉพาะทีมที่มีข้อมูล (ยอดฝาก, ค่าแอด หรือถอน ไม่เป็น 0) หรือ ชื่อทีมไม่ใช่ "ว่าง"
         const scores = PAIRS.map(p => {
             const currentName = getTeamName(p.id);
             const data = JSON.parse(localStorage.getItem('fin_data_' + p.id) || '[]');
             const monthData = data.filter(r => r.date.startsWith(currentGlobalMonth));
 
-            let s = { ads:0, dep:0, fee:0, wd:0, profit:0 };
+            let s = { ads:0, dep:0, fee:0, wd:0, profit:0, hasActivity: false };
             monthData.forEach(r => {
-                const profit = (Number(r.dep)||0) - ((Number(r.ads)||0) + (Number(r.fee)||0) + (Number(r.wd)||0));
-                s.ads += (Number(r.ads)||0); s.dep += (Number(r.dep)||0); s.fee += (Number(r.fee)||0); s.wd += (Number(r.wd)||0); s.profit += profit;
+                const ads = (Number(r.ads)||0);
+                const dep = (Number(r.dep)||0);
+                const fee = (Number(r.fee)||0);
+                const wd = (Number(r.wd)||0);
+                
+                // ตรวจสอบว่ามีการใส่ข้อมูลอะไรไหม
+                if(ads !== 0 || dep !== 0 || wd !== 0) s.hasActivity = true;
+
+                const profit = dep - (ads + fee + wd);
+                s.ads += ads; s.dep += dep; s.fee += fee; s.wd += wd; s.profit += profit;
             });
-            grand.ads += s.ads; grand.dep += s.dep; grand.fee += s.fee; grand.wd += s.wd; grand.profit += s.profit;
+
             return { name: currentName, ...s };
+        }).filter(item => {
+            // เงื่อนไขการแสดงผล: ต้องมีการกรอกข้อมูล (hasActivity) และชื่อต้องไม่ใช่ "ว่าง"
+            return item.hasActivity && item.name !== "ว่าง";
+        });
+
+        // คำนวณยอด Grand Total เฉพาะทีมที่แสดงผล
+        scores.forEach(s => {
+            grand.ads += s.ads; grand.dep += s.dep; grand.fee += s.fee; grand.wd += s.wd; grand.profit += s.profit;
         });
 
         const sorted = [...scores].sort((a,b) => b.profit - a.profit);
+        
+        // 🥇 Rank List
         document.getElementById('rankList').innerHTML = sorted.map((s, i) => `
             <div class="rank-card">
                 <div style="width:50px; font-size:24px;">${i+1}</div>
@@ -427,6 +447,7 @@
             </div>
         `).join('');
 
+        // 💰 Commission List
         document.getElementById('commList').innerHTML = scores.map(s => {
             let rate = s.profit >= 2500000 ? 0.14 : s.profit >= 1500000 ? 0.12 : s.profit >= 800000 ? 0.10 : s.profit >= 400000 ? 0.08 : 0.06;
             let total = Math.round(s.profit * rate);
@@ -449,6 +470,7 @@
             `;
         }).join('');
 
+        // 📊 Grand Table
         document.getElementById('grandTable').innerHTML = scores.map(s => `
             <tr>
                 <td style="color:#fbbf24;">${s.name}</td>
