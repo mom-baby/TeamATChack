@@ -88,7 +88,7 @@
             outline: none;
         }
 
-        table { width: 100%; border-collapse: collapse; background: var(--card-bg); border-radius: 8px; overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; background: var(--card-bg); border-radius: 8px; overflow: hidden; margin-bottom: 20px; }
         th { background: #0f172a; padding: 12px 5px; color: #94a3b8; border: 1px solid var(--border-color); font-size: 13px; white-space: nowrap; }
         td { border: 1px solid var(--border-color); padding: 0; }
         
@@ -105,6 +105,10 @@
         
         .profit-pos { color: var(--accent-green); }
         .profit-neg { color: var(--accent-red); }
+
+        /* Aggregate Table Styles */
+        .agg-header { background: #3730a3 !important; color: white !important; }
+        .agg-row td { padding: 10px; text-align: center; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -112,7 +116,7 @@
 <div class="container">
     <div class="sync-bar">
         <div class="sync-content-left">
-            <strong style="color: white; display:block; margin-bottom:5px; font-size: 1.2em;">🌐 ตารางรวมยอดทีม AT งับ </strong>
+            <strong style="color: white; display:block; margin-bottom:5px; font-size: 1.2em;">🌐 ตารางรวมยอดทีม AT งับ (แยกค่าแอดแล้วนะ)</strong>
             <div style="margin-top: 10px;">
                 <button class="tab-btn" onclick="uploadToCloud()" style="background: #10b981; color: white; padding: 12px 25px; font-size: 1em;">⬆️ บันทึกข้อมูลงับ</button>
                 <button class="tab-btn" onclick="downloadFromCloud()" style="background: #f59e0b; color: white; padding: 12px 25px; font-size: 1em;">⬇️ ดึงข้อมูลล่าสุดงับ</button>
@@ -139,12 +143,31 @@
     <div id="ranking" class="tab-content active">
         <h2>🥇 อันดับกำไรของสมาชิกในทีม AT <span id="dashMonthLabel" style="color:var(--accent-gold)"></span></h2>
         <div id="rankList"></div>
+        
         <h2 style="margin-top:30px;">💰 อันนี้ค่าคอมงับ </h2>
         <div id="commList" class="comm-grid"></div>
-        <h2 style="margin-top:30px;">📊 รวมๆทั้งหมดงับ </h2>
+        
+        <h2 style="margin-top:30px;">📊 สรุปยอดรายทีม (ทั้งเดือน) </h2>
         <table style="margin-top:10px;">
             <thead><tr><th>ทีม</th><th>ค่าแอท</th><th>ยอดฝาก</th><th>ธรรมเนียม</th><th>ยอดถอน</th><th>กำไรสุทธิ</th></tr></thead>
             <tbody id="grandTable"></tbody>
+        </table>
+
+        <h2 style="margin-top:30px; color:#3b82f6;">📅 รวม 阿塔 </h2>
+        <table style="margin-top:10px;">
+            <thead>
+                <tr>
+                    <th class="agg-header">วันที่</th>
+                    <th class="agg-header">รวมค่าแอท</th>
+                    <th class="agg-header">รวมยอดฝาก</th>
+                    <th class="agg-header">รวมธรรมเนียม</th>
+                    <th class="agg-header">รวมยอดถอน</th>
+                    <th class="agg-header">รวมกำไร</th>
+                </tr>
+            </thead>
+            <tbody id="dailyAggregateTable">
+                </tbody>
+            <tfoot id="dailyAggregateFooter"></tfoot>
         </table>
     </div>
 
@@ -257,6 +280,11 @@
         if(id === 'ranking') updateDashboard();
     }
 
+    // ฟังก์ชั่นช่วยเช็คว่ามีค่าหรือไม่ (ถ้าเป็น 0 ก็ให้แสดง 0 ไม่ใช่ว่างเปล่า)
+    function safeVal(val) {
+        return (val !== undefined && val !== null && val !== '') ? val : '';
+    }
+
     function renderTable(pId) {
         const [year, month] = currentGlobalMonth.split('-').map(Number);
         const daysInMonth = new Date(year, month, 0).getDate();
@@ -269,13 +297,15 @@
             const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
             const rowData = allData.find(r => r.date === dateStr) || {};
             
-            const ads = rowData.ads || '';
-            const dep = rowData.dep || '';
-            const fee = rowData.fee || '';
-            const wd = rowData.wd || '';
-            const bill = rowData.bill || '';
+            // แก้ไขตรงนี้: ใช้ safeVal เพื่อไม่ให้เลข 0 หาย
+            const ads = safeVal(rowData.ads);
+            const dep = safeVal(rowData.dep);
+            const fee = safeVal(rowData.fee);
+            const wd = safeVal(rowData.wd);
+            const bill = safeVal(rowData.bill);
             
             let profitVal = '';
+            // คำนวณถ้ามีตัวเลข (รวมถึง 0)
             if(dep !== '' || ads !== '' || fee !== '' || wd !== '') {
                 profitVal = (Number(dep) || 0) - ((Number(ads) || 0) + (Number(fee) || 0) + (Number(wd) || 0));
             }
@@ -300,20 +330,35 @@
     function handleInput(pId, dateStr) {
         const row = document.querySelector(`#tbody_${pId} tr[data-date="${dateStr}"]`);
         
-        const adsVal = Number(row.querySelector('.col-ads').value) || 0;
-        const depVal = Number(row.querySelector('.col-dep').value) || 0;
-        const wdVal = Number(row.querySelector('.col-wd').value) || 0;
+        // อ่านค่าแบบ Raw String ก่อน
+        const adsInput = row.querySelector('.col-ads').value;
+        const depInput = row.querySelector('.col-dep').value;
+        const wdInput = row.querySelector('.col-wd').value;
         const billVal = row.querySelector('.col-bill').value; 
 
-        const feeVal = Math.round(depVal * 0.32);
+        // แปลงเป็นตัวเลขสำหรับการคำนวณ (ถ้าว่างให้เป็น 0)
+        const adsNum = Number(adsInput);
+        const depNum = Number(depInput);
+        const wdNum = Number(wdInput);
+
+        // คำนวณ Fee
+        const feeVal = Math.round(depNum * 0.32);
         row.querySelector('.col-fee').value = feeVal;
 
-        const profitVal = depVal - (adsVal + feeVal + wdVal);
+        // คำนวณ Profit
+        const profitVal = depNum - (adsNum + feeVal + wdNum);
         const profitInput = row.querySelector('.col-profit');
         profitInput.value = profitVal.toLocaleString();
         profitInput.className = `grid-input col-profit ${profitVal < 0 ? 'profit-neg' : 'profit-pos'}`;
 
-        saveData(pId, dateStr, adsVal, depVal, feeVal, wdVal, billVal);
+        // บันทึกข้อมูล (ถ้า input ว่าง ให้บันทึกเป็น '' ถ้าเป็น 0 ให้บันทึก 0)
+        saveData(pId, dateStr, 
+            adsInput === '' ? '' : adsNum, 
+            depInput === '' ? '' : depNum, 
+            feeVal, 
+            wdInput === '' ? '' : wdNum, 
+            billVal
+        );
         updateFooter(pId);
     }
 
@@ -403,9 +448,8 @@
     function updateDashboard() {
         document.getElementById('dashMonthLabel').innerText = `(เดือน: ${currentGlobalMonth})`;
 
+        // --- ส่วนที่ 1: คำนวณยอดรายทีม ---
         let grand = { ads:0, dep:0, fee:0, wd:0, profit:0 };
-        
-        // กรองเอาเฉพาะทีมที่มีข้อมูล (ยอดฝาก, ค่าแอด หรือถอน ไม่เป็น 0) หรือ ชื่อทีมไม่ใช่ "ว่าง"
         const scores = PAIRS.map(p => {
             const currentName = getTeamName(p.id);
             const data = JSON.parse(localStorage.getItem('fin_data_' + p.id) || '[]');
@@ -417,28 +461,20 @@
                 const dep = (Number(r.dep)||0);
                 const fee = (Number(r.fee)||0);
                 const wd = (Number(r.wd)||0);
-                
-                // ตรวจสอบว่ามีการใส่ข้อมูลอะไรไหม
                 if(ads !== 0 || dep !== 0 || wd !== 0) s.hasActivity = true;
-
                 const profit = dep - (ads + fee + wd);
                 s.ads += ads; s.dep += dep; s.fee += fee; s.wd += wd; s.profit += profit;
             });
-
             return { name: currentName, ...s };
-        }).filter(item => {
-            // เงื่อนไขการแสดงผล: ต้องมีการกรอกข้อมูล (hasActivity) และชื่อต้องไม่ใช่ "ว่าง"
-            return item.hasActivity && item.name !== "ว่าง";
-        });
+        }).filter(item => item.hasActivity && item.name !== "ว่าง");
 
-        // คำนวณยอด Grand Total เฉพาะทีมที่แสดงผล
         scores.forEach(s => {
             grand.ads += s.ads; grand.dep += s.dep; grand.fee += s.fee; grand.wd += s.wd; grand.profit += s.profit;
         });
 
         const sorted = [...scores].sort((a,b) => b.profit - a.profit);
         
-        // 🥇 Rank List
+        // Render Rank List
         document.getElementById('rankList').innerHTML = sorted.map((s, i) => `
             <div class="rank-card">
                 <div style="width:50px; font-size:24px;">${i+1}</div>
@@ -447,7 +483,7 @@
             </div>
         `).join('');
 
-        // 💰 Commission List
+        // Render Commission List
         document.getElementById('commList').innerHTML = scores.map(s => {
             let rate = s.profit >= 2500000 ? 0.14 : s.profit >= 1500000 ? 0.12 : s.profit >= 800000 ? 0.10 : s.profit >= 400000 ? 0.08 : 0.06;
             let total = Math.round(s.profit * rate);
@@ -470,7 +506,7 @@
             `;
         }).join('');
 
-        // 📊 Grand Table
+        // Render Grand Table
         document.getElementById('grandTable').innerHTML = scores.map(s => `
             <tr>
                 <td style="color:#fbbf24;">${s.name}</td>
@@ -488,6 +524,69 @@
                 <td style="text-align:center;">${grand.fee.toLocaleString()}</td>
                 <td style="text-align:center;">${grand.wd.toLocaleString()}</td>
                 <td style="text-align:center;">${grand.profit.toLocaleString()}</td>
+            </tr>
+        `;
+
+        // --- ส่วนที่ 2: ตารางรวมรายวัน (Daily Aggregate) ---
+        const [y, m] = currentGlobalMonth.split('-').map(Number);
+        const days = new Date(y, m, 0).getDate();
+        const aggTbody = document.getElementById('dailyAggregateTable');
+        const aggFooter = document.getElementById('dailyAggregateFooter');
+        aggTbody.innerHTML = '';
+        
+        let aggTotal = { ads:0, dep:0, fee:0, wd:0, profit:0 };
+
+        for(let d = 1; d <= days; d++) {
+            const dateStr = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+            let daySum = { ads:0, dep:0, fee:0, wd:0, profit:0 };
+
+            // วนลูปทุกทีม (P1-P5) เพื่อรวมยอดของวันนั้นๆ
+            PAIRS.forEach(p => {
+                const teamData = JSON.parse(localStorage.getItem('fin_data_' + p.id) || '[]');
+                const dayData = teamData.find(r => r.date === dateStr) || {};
+                
+                const a = Number(dayData.ads) || 0;
+                const dp = Number(dayData.dep) || 0;
+                const f = Number(dayData.fee) || 0;
+                const w = Number(dayData.wd) || 0;
+                
+                daySum.ads += a;
+                daySum.dep += dp;
+                daySum.fee += f;
+                daySum.wd += w;
+            });
+            daySum.profit = daySum.dep - (daySum.ads + daySum.fee + daySum.wd);
+
+            // สะสมยอดรวมทั้งเดือน
+            aggTotal.ads += daySum.ads;
+            aggTotal.dep += daySum.dep;
+            aggTotal.fee += daySum.fee;
+            aggTotal.wd += daySum.wd;
+            aggTotal.profit += daySum.profit;
+
+            const profitClass = daySum.profit < 0 ? 'profit-neg' : 'profit-pos';
+
+            aggTbody.innerHTML += `
+                <tr class="agg-row">
+                    <td style="background:#0f172a; color:#94a3b8;">${dateStr}</td>
+                    <td>${daySum.ads.toLocaleString()}</td>
+                    <td>${daySum.dep.toLocaleString()}</td>
+                    <td>${daySum.fee.toLocaleString()}</td>
+                    <td>${daySum.wd.toLocaleString()}</td>
+                    <td style="font-weight:bold;" class="${profitClass}">${daySum.profit.toLocaleString()}</td>
+                </tr>
+            `;
+        }
+
+        // Footer ของตารางรวมรายวัน
+        aggFooter.innerHTML = `
+            <tr style="background:#fbbf24; color:black; font-weight:bold; border-top:2px solid white;">
+                <td style="text-align:center; padding:12px;">รวมทั้งเดือน</td>
+                <td style="text-align:center;">${aggTotal.ads.toLocaleString()}</td>
+                <td style="text-align:center;">${aggTotal.dep.toLocaleString()}</td>
+                <td style="text-align:center;">${aggTotal.fee.toLocaleString()}</td>
+                <td style="text-align:center;">${aggTotal.wd.toLocaleString()}</td>
+                <td style="text-align:center;">${aggTotal.profit.toLocaleString()}</td>
             </tr>
         `;
     }
