@@ -2,114 +2,185 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>Management Dashboard - Independent Ads</title>
+    <title>AT รวมแอด Ads</title>
     <link rel="icon" type="image/png" href="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExeGRoZ3F6OXR5dW92YzU5bWJ3NGE1dHJ4YXdpMGpyNHhtdDlibWVpcyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/oSOvGVxgijmB5sHHHb/giphy.gif">
     <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
-            --dark-bg: #0f172a;
+            --dark-bg: #0b1120;
             --card-bg: #1e293b;
+            --card-hover: #334155;
             --accent-gold: #fbbf24;
             --accent-blue: #3b82f6;
             --accent-green: #10b981;
             --accent-red: #ef4444;
             --text-main: #f8fafc;
+            --text-muted: #94a3b8;
             --border-color: #334155;
+            --input-bg: #0f172a;
+            --input-focus: #172554;
         }
 
-        body { font-family: 'Mitr', sans-serif; background: var(--dark-bg); color: var(--text-main); margin: 0; padding: 20px; }
-        .container { max-width: 1800px; margin: auto; }
+        body { 
+            font-family: 'Mitr', sans-serif; 
+            background: var(--dark-bg); 
+            color: var(--text-main); 
+            margin: 0; 
+            padding: 24px; 
+            line-height: 1.6;
+        }
+        .container { max-width: 1600px; margin: auto; }
 
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
 
-        /* Tabs Nav */
-        .tabs-nav { display: flex; align-items: center; gap: 10px; margin-bottom: 25px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; flex-wrap: wrap; }
+        /* Sync Bar (Header) */
+        .sync-bar {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            padding: 24px 32px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--accent-blue);
+            box-shadow: 0 10px 30px -10px rgba(59, 130, 246, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
         
-        .tab-btn { padding: 10px 20px; border: none; background: #334155; color: #94a3b8; cursor: pointer; border-radius: 6px; font-family: 'Mitr'; transition: 0.2s; }
-        .tab-btn.active { background: var(--accent-blue); color: white; }
-        .tab-rank.active { background: var(--accent-gold); color: black; font-weight: bold; }
+        .sync-content-left { position: relative; z-index: 5; }
+        .header-title { color: white; display: block; margin-bottom: 12px; font-size: 1.5em; font-weight: 500; }
+        .btn-group { display: flex; gap: 12px; margin-top: 10px; }
+        
+        .action-btn {
+            border: none; padding: 12px 24px; border-radius: 8px; font-family: 'Mitr'; font-size: 1em; font-weight: 500;
+            cursor: pointer; transition: all 0.2s ease; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .btn-save { background: var(--accent-green); }
+        .btn-save:hover { background: #059669; transform: translateY(-2px); }
+        .btn-load { background: #f59e0b; }
+        .btn-load:hover { background: #d97706; transform: translateY(-2px); }
+        
+        /* ปุ่มคัดลอกมุมขวาบนของตารางเป๊ะๆ */
+        .btn-corner-copy {
+            position: absolute;
+            right: 0px;
+            top: -40px; 
+            z-index: 10;
+            background: #334155;
+            border: none;
+            color: #f8fafc;
+            padding: 6px 18px;
+            border-radius: 6px;
+            font-family: 'Mitr';
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 500;
+        }
+        .btn-corner-copy:hover {
+            background: #475569;
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
 
-        /* Global Month Picker Style */
-        .global-date-picker { margin-left: auto; display: flex; align-items: center; gap: 10px; background: var(--card-bg); padding: 5px 15px; border-radius: 8px; border: 1px solid var(--accent-gold); }
-        input[type="month"] { background: #0f172a; border: 1px solid #3b82f6; color: white; padding: 5px 10px; border-radius: 5px; font-family: 'Mitr'; cursor: pointer; font-size: 16px; }
+        .btn-copy-small {
+            background: #334155; border: none; color: #f8fafc; padding: 8px 16px; border-radius: 6px; 
+            font-family: 'Mitr'; font-size: 0.9em; cursor: pointer; transition: 0.2s; font-weight: 500;
+        }
+        .btn-copy-small:hover { background: #475569; color: white; }
+
+        #syncStatus { font-size: 14px; color: var(--text-muted); margin-top: 12px; font-weight: 300; }
+
+        .mascot-logo {
+            width: 130px; 
+            height: 130px; 
+            border-radius: 50%; 
+            object-fit: cover; 
+            position: absolute; 
+            right: 40px; 
+            top: 50%; 
+            transform: translateY(-50%);
+            z-index: 10; 
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); 
+            transition: transform 0.3s;
+        }
+        .mascot-logo:hover { transform: translateY(-50%) scale(1.1); }
+
+        .tabs-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; border-bottom: 2px solid var(--border-color); padding-bottom: 16px; flex-wrap: wrap; }
+        .tab-btn { padding: 12px 28px; border: none; background: transparent; color: var(--text-muted); cursor: pointer; border-radius: 8px; font-family: 'Mitr'; font-size: 1.05em; transition: all 0.2s; }
+        .tab-btn:hover { background: var(--card-bg); color: var(--text-main); }
+        .tab-btn.active { background: var(--accent-blue); color: white; font-weight: 500; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); }
+        .tab-rank.active { background: var(--accent-gold); color: black; box-shadow: 0 4px 12px rgba(251, 191, 36, 0.4); }
+
+        .global-date-picker { margin-left: auto; display: flex; align-items: center; gap: 12px; background: var(--card-bg); padding: 8px 20px; border-radius: 8px; border: 1px solid var(--border-color); }
+        input[type="month"] { background: var(--dark-bg); border: 1px solid var(--accent-blue); color: var(--text-main); padding: 8px 12px; border-radius: 6px; font-family: 'Mitr'; cursor: pointer; font-size: 16px; outline: none; }
 
         .tab-content { display: none; animation: fadeIn 0.3s ease; }
         .tab-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Sync Bar & Centered Logo */
-        .sync-bar {
-            background: #1e3a8a;
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            display: flex;
-            align-items: center;
-            border: 1px solid #3b82f6;
-            position: relative;
-            min-height: 120px;
-            overflow: visible;
+        h2 { font-weight: 500; margin: 40px 0 20px 0; font-size: 1.4em; }
+
+        .table-container { border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; background: var(--card-bg); }
+        th { background: #0f172a; padding: 16px 12px; color: var(--text-muted); font-size: 15px; font-weight: 500; border-bottom: 1px solid var(--border-color); text-align: right; }
+        th.text-center { text-align: center; }
+        th.text-left { text-align: left; }
+        th.fee-col { color: var(--accent-gold); font-size: 16px; } 
+        td { border-bottom: 1px solid var(--border-color); padding: 0; position: relative; }
+        
+        .grid-input { width: 100%; height: 100%; padding: 16px 12px; background: var(--input-bg); border: 1px solid transparent; color: var(--text-main); text-align: right; font-family: 'Mitr'; font-size: 16px; outline: none; box-sizing: border-box; transition: all 0.1s; }
+        .grid-input:focus { background: var(--input-focus); border: 2px solid var(--accent-blue); box-shadow: inset 0 0 5px rgba(0,0,0,0.5); border-radius: 4px; z-index: 2; position: relative; }
+        .grid-input[readonly] { background: transparent; color: var(--text-muted); font-weight: 500; cursor: default; border: none; }
+        
+        .col-fee { color: var(--accent-gold) !important; font-weight: 600 !important; font-size: 17px !important; }
+        .date-col { background: #0f172a; color: var(--text-muted); text-align: center; font-size: 15px; width: 120px; padding: 16px 0; font-weight: 500; }
+        
+        .sum-row td { background: #0f172a; color: var(--text-main); font-weight: 500; padding: 18px 12px; text-align: right; font-size: 16px; border-top: 3px solid var(--border-color); }
+        .sum-row td:first-child { text-align: center; color: var(--accent-gold); }
+        .sum-fee-cell { color: var(--accent-gold) !important; font-weight: 600 !important; font-size: 18px !important; }
+
+        .rank-card { display: flex; align-items: center; padding: 20px 24px; background: var(--card-bg); margin-bottom: 12px; border-radius: 12px; border-left: 5px solid var(--accent-gold); }
+        
+        .comm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 24px; margin-top: 20px; }
+        .comm-box { background: var(--card-bg); padding: 24px; border-radius: 12px; border: 1px solid var(--border-color); position: relative; }
+        
+        .profit-pos { color: var(--accent-green) !important; font-weight: 600; }
+        .profit-neg { color: var(--accent-red) !important; font-weight: 600; }
+
+        .agg-table td { padding: 18px 12px; text-align: right; font-size: 16px; color: var(--text-main); }
+        .agg-table td.text-center { text-align: center; color: var(--text-muted); }
+        .agg-table td.text-left { text-align: left; padding-left: 24px; }
+        .agg-fee-cell { color: var(--accent-gold) !important; font-weight: 600; }
+
+        .team-name-input { background: transparent; border: none; border-bottom: 2px solid var(--border-color); color: var(--accent-gold); font-size: 1.3em; font-weight: 500; font-family: 'Mitr'; width: 300px; padding: 8px; outline: none; margin-left: 10px; transition: 0.2s; }
+        .team-name-input:focus { border-bottom-color: var(--accent-gold); }
+
+        /* กรอบสำหรับการแคปรูปเพื่อให้มุมมนติดไปด้วย */
+        .capture-wrapper {
+            background: var(--dark-bg);
+            border-radius: 16px;
+            padding: 0px; 
+            display: inline-block;
+            width: 100%;
+            box-sizing: border-box;
+            position: relative; 
+            margin-top: 40px; /* เว้นที่ให้ปุ่มคัดลอกด้านบน */
         }
         
-        .mascot-logo {
-            height: 150px;
-            width: auto;
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 10;
-            filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.7));
-            transition: transform 0.3s, filter 0.3s;
+        /* สไตล์สำหรับหัวข้อตารางที่แสดงผลให้สวยงาม */
+        .section-header {
+            text-align: center; 
+            color: #3b82f6; 
+            font-size: 1.8em; 
+            margin-top: 0; 
+            margin-bottom: 20px; 
+            font-weight: 500;
         }
-        .mascot-logo:hover {
-             transform: translate(-50%, -50%) scale(1.1);
-             filter: drop-shadow(0 0 25px rgba(59, 130, 246, 1));
-        }
-
-        .sync-content-left {
-            position: relative;
-            z-index: 5;
-            padding-right: 160px;
-        }
-
-        .controls-bar { background: var(--card-bg); padding: 15px; border-radius: 10px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; border: 1px solid var(--border-color); }
-
-        .team-name-input {
-            background: transparent;
-            border: none;
-            border-bottom: 2px dashed var(--accent-gold);
-            color: var(--accent-gold);
-            font-size: 1.17em;
-            font-weight: bold;
-            font-family: 'Mitr';
-            width: 200px;
-            padding: 5px;
-            outline: none;
-        }
-
-        table { width: 100%; border-collapse: collapse; background: var(--card-bg); border-radius: 8px; overflow: hidden; margin-bottom: 20px; }
-        th { background: #0f172a; padding: 12px 5px; color: #94a3b8; border: 1px solid var(--border-color); font-size: 13px; white-space: nowrap; }
-        td { border: 1px solid var(--border-color); padding: 0; }
-        
-        .grid-input { width: 100%; height: 100%; padding: 10px; background: transparent; border: none; color: white; text-align: center; font-family: 'Mitr'; font-size: 14px; outline: none; box-sizing: border-box; }
-        .grid-input:focus { background: #1e3a8a; box-shadow: inset 0 0 0 2px #3b82f6; }
-        .grid-input[readonly] { cursor: default; font-weight: bold; }
-        .date-col { background: #0f172a; color: #94a3b8; text-align: center; font-size: 13px; width: 100px; }
-        
-        .sum-row td { background: #0f172a; color: var(--accent-gold); font-weight: bold; padding: 12px 5px; text-align: center; font-size: 14px; border-top: 2px solid var(--accent-gold); }
-
-        .rank-card { display: flex; align-items: center; padding: 15px; background: var(--card-bg); margin-bottom: 10px; border-radius: 8px; border-left: 5px solid var(--accent-gold); }
-        .comm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-top: 20px; }
-        .comm-box { background: var(--card-bg); padding: 20px; border-radius: 8px; border: 1px solid var(--border-color); }
-        
-        .profit-pos { color: var(--accent-green); }
-        .profit-neg { color: var(--accent-red); }
-
-        /* Aggregate Table Styles */
-        .agg-header { background: #3730a3 !important; color: white !important; }
-        .agg-row td { padding: 10px; text-align: center; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -117,12 +188,12 @@
 <div class="container">
     <div class="sync-bar">
         <div class="sync-content-left">
-            <strong style="color: white; display:block; margin-bottom:5px; font-size: 1.2em;">🌐 ตารางรวมยอดทีม AT งับ (แยกค่าแอดแล้วนะ)</strong>
-            <div style="margin-top: 10px;">
-                <button class="tab-btn" onclick="uploadToCloud()" style="background: #10b981; color: white; padding: 12px 25px; font-size: 1em;">⬆️ บันทึกข้อมูลงับ</button>
-                <button class="tab-btn" onclick="downloadFromCloud()" style="background: #f59e0b; color: white; padding: 12px 25px; font-size: 1em;">⬇️ ดึงข้อมูลล่าสุดงับ</button>
+            <strong class="header-title">🌐 ตารางรวมยอดทีม AT งับ</strong>
+            <div class="btn-group">
+                <button class="action-btn btn-save" onclick="uploadToCloud()">⬆️ บันทึกข้อมูลงับ</button>
+                <button class="action-btn btn-load" onclick="downloadFromCloud()">⬇️ ดึงข้อมูลล่าสุดงับ</button>
             </div>
-            <div id="syncStatus" style="font-size: 14px; color: #cbd5e1; margin-top: 10px; font-style: italic;">👉 กด "ดึงข้อมูลล่าสุด" ก่อนนะต่ะเอง </div>
+            <div id="syncStatus">👉 กด "ดึงข้อมูลล่าสุด" ก่อนนะต่ะเอง </div>
         </div>
         <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExeGRoZ3F6OXR5dW92YzU5bWJ3NGE1dHJ4YXdpMGpyNHhtdDlibWVpcyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/oSOvGVxgijmB5sHHHb/giphy.gif" class="mascot-logo" alt="Logo">
     </div>
@@ -136,40 +207,62 @@
         <button id="btn_p5" class="tab-btn" onclick="switchTab('p5')">P5</button>
 
         <div class="global-date-picker">
-            <label style="color: #fbbf24; font-weight: bold;">📅 เดือน:</label>
+            <label style="color: var(--text-muted); font-weight: 500;">📅 เดือน:</label>
             <input type="month" id="globalMonthPicker" onchange="onGlobalMonthChange()">
         </div>
     </div>
 
     <div id="ranking" class="tab-content active">
-        <h2>🥇 อันดับกำไรของสมาชิกในทีม AT <span id="dashMonthLabel" style="color:var(--accent-gold)"></span></h2>
+        <h2 style="font-weight: 500; font-size: 1.4em;">🥇 กำไรทีม AT <span id="dashMonthLabel" style="color:var(--text-muted); font-size:0.8em; margin-left:10px;"></span></h2>
         <div id="rankList"></div>
         
-        <h2 style="margin-top:30px;">💰 อันนี้ค่าคอมงับ </h2>
+        <h2 style="font-weight: 500; font-size: 1.4em; margin-top: 40px;">💰 อันนี้ค่าคอมงับ </h2>
         <div id="commList" class="comm-grid"></div>
         
-        <h2 style="margin-top:30px;">📊 สรุปยอดรายทีม (ทั้งเดือน) </h2>
-        <table style="margin-top:10px;">
-            <thead><tr><th>ทีม</th><th>ค่าแอท</th><th>ยอดฝาก</th><th>ธรรมเนียม</th><th>ยอดถอน</th><th>กำไรสุทธิ</th></tr></thead>
-            <tbody id="grandTable"></tbody>
-        </table>
+        <div id="capture_team_summary" class="capture-wrapper" style="margin-top: 80px;">
+            <button class="btn-corner-copy no-capture" onclick="captureAsImage('capture_team_summary', 'capture_team_summary_title')">คัดลอก</button>
+            <div id="capture_team_summary_title" style="display: none; text-align: center; margin-bottom: 20px;">
+                <div class="section-header">สรุปยอดรายทีม</div>
+            </div>
+            <div class="table-container">
+                <table class="agg-table">
+                    <thead>
+                        <tr>
+                            <th class="text-left">ทีม</th>
+                            <th>ค่าแอท</th>
+                            <th>ยอดฝาก</th>
+                            <th class="fee-col">ธรรมเนียม</th>
+                            <th>ยอดถอน</th>
+                            <th>กำไรสุทธิ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="grandTable"></tbody>
+                </table>
+            </div>
+        </div>
 
-        <h2 style="margin-top:30px; color:#3b82f6;">📅 รวม 阿塔 </h2>
-        <table style="margin-top:10px;">
-            <thead>
-                <tr>
-                    <th class="agg-header">วันที่</th>
-                    <th class="agg-header">รวมค่าแอท</th>
-                    <th class="agg-header">รวมยอดฝาก</th>
-                    <th class="agg-header">รวมธรรมเนียม</th>
-                    <th class="agg-header">รวมยอดถอน</th>
-                    <th class="agg-header">รวมกำไร</th>
-                </tr>
-            </thead>
-            <tbody id="dailyAggregateTable">
-                </tbody>
-            <tfoot id="dailyAggregateFooter"></tfoot>
-        </table>
+        <div id="capture_aggregate" class="capture-wrapper" style="margin-top: 80px;">
+            <button class="btn-corner-copy no-capture" onclick="captureAsImage('capture_aggregate', 'capture_aggregate_title')">คัดลอก</button>
+            <div id="capture_aggregate_title" style="display: none; text-align: center; margin-bottom: 20px;">
+                <div class="section-header">รวม 阿塔</div>
+            </div>
+            <div class="table-container">
+                <table class="agg-table">
+                    <thead>
+                        <tr>
+                            <th class="text-center" style="width: 120px;">วันที่</th>
+                            <th>รวมค่าแอท</th>
+                            <th>รวมยอดฝาก</th>
+                            <th class="fee-col">รวมธรรมเนียม</th>
+                            <th>รวมยอดถอน</th>
+                            <th>รวมกำไร</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dailyAggregateTable"></tbody>
+                    <tfoot id="dailyAggregateFooter"></tfoot>
+                </table>
+            </div>
+        </div>
     </div>
 
     <div id="teamContainer"></div>
@@ -192,37 +285,44 @@
     PAIRS.forEach(p => {
         container.innerHTML += `
             <div id="${p.id}" class="tab-content">
-                <div class="controls-bar">
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <h3>👤 ทีม:</h3>
-                        <input type="text" id="nameInput_${p.id}" class="team-name-input" 
-                               placeholder="ตั้งชื่อทีมได้เลยน๊าตัวเอง..." 
-                               oninput="handleNameChange('${p.id}', this.value)">
+                <div style="background:var(--card-bg); padding:15px 24px; border-radius:12px; border:1px solid var(--border-color); display:flex; align-items:center; margin-bottom: 20px;">
+                    <span style="font-size:1.2em; color:var(--text-muted);">👤 ทีม:</span>
+                    <input type="text" id="nameInput_${p.id}" class="team-name-input" placeholder="ตั้งชื่อทีม..." oninput="handleNameChange('${p.id}', this.value)">
+                </div>
+                
+                <div id="capture_team_${p.id}" class="capture-wrapper" style="margin-top: 50px;">
+                    <button class="btn-corner-copy no-capture" onclick="captureAsImage('capture_team_${p.id}', 'capture_team_title_${p.id}')">คัดลอก</button>
+                    <div id="capture_team_title_${p.id}" style="display: none; text-align: center; margin-bottom: 20px;">
+                        <div class="section-header" id="display_name_${p.id}"></div>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th class="text-center" style="width: 120px;">วันที่</th>
+                                    <th>ค่าแอท</th>
+                                    <th>ยอดฝาก</th>
+                                    <th class="fee-col">ธรรมเนียม (32%)</th>
+                                    <th>ยอดถอน</th>
+                                    <th>บิลเชือด</th>
+                                    <th>กำไร</th> 
+                                </tr>
+                            </thead>
+                            <tbody id="tbody_${p.id}"></tbody>
+                            <tfoot id="tfoot_${p.id}">
+                                <tr class="sum-row">
+                                    <td class="text-center">รวม</td>
+                                    <td id="sum_ads_${p.id}">0</td>
+                                    <td id="sum_dep_${p.id}">0</td>
+                                    <td id="sum_fee_${p.id}" class="sum-fee-cell">0</td>
+                                    <td id="sum_wd_${p.id}">0</td>
+                                    <td id="sum_bill_${p.id}">0</td>
+                                    <td id="sum_profit_${p.id}">0</td> 
+                                </tr>
+                            </tfoot>
+                        </table>
                     </div>
                 </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th class="date-col">วันที่</th>
-                            <th>ค่าแอท</th>
-                            <th>ยอดฝาก</th>
-                            <th>ธรรมเนียม (32%)</th>
-                            <th>ยอดถอน</th>
-                            <th>บิลเชือด</th>
-                            <th>กำไร</th> </tr>
-                    </thead>
-                    <tbody id="tbody_${p.id}"></tbody>
-                    <tfoot id="tfoot_${p.id}">
-                        <tr class="sum-row">
-                            <td>รวม</td>
-                            <td id="sum_ads_${p.id}">0</td>
-                            <td id="sum_dep_${p.id}">0</td>
-                            <td id="sum_fee_${p.id}">0</td>
-                            <td id="sum_wd_${p.id}">0</td>
-                            <td id="sum_bill_${p.id}">0</td>
-                            <td id="sum_profit_${p.id}">0</td> </tr>
-                    </tfoot>
-                </table>
             </div>
         `;
     });
@@ -261,10 +361,14 @@
         localStorage.setItem('team_config', JSON.stringify(config));
         updateTabButtons();
         updateDashboard();
+        updateNameInput(pId);
     }
 
     function updateNameInput(pId) {
-        document.getElementById(`nameInput_${pId}`).value = getTeamName(pId);
+        const name = getTeamName(pId);
+        document.getElementById(`nameInput_${pId}`).value = name;
+        const displayEl = document.getElementById(`display_name_${pId}`);
+        if(displayEl) displayEl.innerText = name;
     }
 
     function updateTabButtons() {
@@ -281,9 +385,37 @@
         if(id === 'ranking') updateDashboard();
     }
 
-    // ฟังก์ชั่นช่วยเช็คว่ามีค่าหรือไม่ (ถ้าเป็น 0 ก็ให้แสดง 0 ไม่ใช่ว่างเปล่า)
     function safeVal(val) {
         return (val !== undefined && val !== null && val !== '') ? val : '';
+    }
+
+    function handleKeyNavigation(e, pId, rowIdx, colName) {
+        const editableCols = ['ads', 'dep', 'wd', 'bill'];
+        const currentColIdx = editableCols.indexOf(colName);
+        let targetRow = rowIdx;
+        let targetColIdx = currentColIdx;
+
+        if (e.key === 'ArrowUp') targetRow--;
+        else if (e.key === 'ArrowDown' || e.key === 'Enter') targetRow++;
+        else if (e.key === 'ArrowLeft') targetColIdx--;
+        else if (e.key === 'ArrowRight') targetColIdx++;
+        else return;
+
+        e.preventDefault(); 
+        const [year, month] = currentGlobalMonth.split('-').map(Number);
+        const daysInMonth = new Date(year, month, 0).getDate();
+
+        if (targetRow < 1 || targetRow > daysInMonth || targetColIdx < 0 || targetColIdx >= editableCols.length) return;
+
+        const targetColName = editableCols[targetColIdx];
+        const targetInput = document.querySelector(`#tbody_${pId} tr[data-row="${targetRow}"] .col-${targetColName}`);
+        
+        if (targetInput) { targetInput.focus(); targetInput.select(); }
+    }
+
+    function focusRow(rowElement) {
+        document.querySelectorAll('tr').forEach(tr => tr.classList.remove('active-row'));
+        rowElement.classList.add('active-row');
     }
 
     function renderTable(pId) {
@@ -298,29 +430,27 @@
             const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
             const rowData = allData.find(r => r.date === dateStr) || {};
             
-            // แก้ไขตรงนี้: ใช้ safeVal เพื่อไม่ให้เลข 0 หาย
-            const ads = safeVal(rowData.ads);
-            const dep = safeVal(rowData.dep);
-            const fee = safeVal(rowData.fee);
-            const wd = safeVal(rowData.wd);
-            const bill = safeVal(rowData.bill);
+            const ads = safeVal(rowData.ads); const dep = safeVal(rowData.dep); const fee = safeVal(rowData.fee);
+            const wd = safeVal(rowData.wd); const bill = safeVal(rowData.bill);
             
             let profitVal = '';
-            // คำนวณถ้ามีตัวเลข (รวมถึง 0)
             if(dep !== '' || ads !== '' || fee !== '' || wd !== '') {
                 profitVal = (Number(dep) || 0) - ((Number(ads) || 0) + (Number(fee) || 0) + (Number(wd) || 0));
             }
-
-            const profitColor = profitVal < 0 ? 'profit-neg' : 'profit-pos';
+            const profitColor = profitVal === '' ? '' : (profitVal < 0 ? 'profit-neg' : 'profit-pos');
 
             tbody.innerHTML += `
-                <tr data-date="${dateStr}">
-                    <td class="date-col">${dateStr}</td>
-                    <td><input type="number" class="grid-input col-ads" value="${ads}" placeholder="-" oninput="handleInput('${pId}', '${dateStr}')"></td>
-                    <td><input type="number" class="grid-input col-dep" value="${dep}" placeholder="-" oninput="handleInput('${pId}', '${dateStr}')"></td>
+                <tr data-date="${dateStr}" data-row="${d}">
+                    <td class="date-col">${d} ${new Date(year, month-1, d).toLocaleDateString('th-TH', {month:'short'})}</td>
+                    <td><input type="number" class="grid-input col-ads" value="${ads}" placeholder="-" 
+                        onfocus="focusRow(this.parentElement.parentElement)" oninput="handleInput('${pId}', '${dateStr}')" onkeydown="handleKeyNavigation(event, '${pId}', ${d}, 'ads')"></td>
+                    <td><input type="number" class="grid-input col-dep" value="${dep}" placeholder="-" 
+                        onfocus="focusRow(this.parentElement.parentElement)" oninput="handleInput('${pId}', '${dateStr}')" onkeydown="handleKeyNavigation(event, '${pId}', ${d}, 'dep')"></td>
                     <td><input type="number" class="grid-input col-fee" value="${fee}" readonly></td>
-                    <td><input type="number" class="grid-input col-wd" value="${wd}" placeholder="-" oninput="handleInput('${pId}', '${dateStr}')"></td>
-                    <td><input type="number" class="grid-input col-bill" value="${bill}" placeholder="-" oninput="handleInput('${pId}', '${dateStr}')"></td>
+                    <td><input type="number" class="grid-input col-wd" value="${wd}" placeholder="-" 
+                        onfocus="focusRow(this.parentElement.parentElement)" oninput="handleInput('${pId}', '${dateStr}')" onkeydown="handleKeyNavigation(event, '${pId}', ${d}, 'wd')"></td>
+                    <td><input type="number" class="grid-input col-bill" value="${bill}" placeholder="-" 
+                        onfocus="focusRow(this.parentElement.parentElement)" oninput="handleInput('${pId}', '${dateStr}')" onkeydown="handleKeyNavigation(event, '${pId}', ${d}, 'bill')"></td>
                     <td><input type="text" class="grid-input col-profit ${profitColor}" value="${profitVal !== '' ? profitVal.toLocaleString() : '-'}" readonly></td>
                 </tr>
             `;
@@ -330,36 +460,19 @@
 
     function handleInput(pId, dateStr) {
         const row = document.querySelector(`#tbody_${pId} tr[data-date="${dateStr}"]`);
-        
-        // อ่านค่าแบบ Raw String ก่อน
-        const adsInput = row.querySelector('.col-ads').value;
-        const depInput = row.querySelector('.col-dep').value;
-        const wdInput = row.querySelector('.col-wd').value;
-        const billVal = row.querySelector('.col-bill').value; 
+        const adsInput = row.querySelector('.col-ads').value; const depInput = row.querySelector('.col-dep').value;
+        const wdInput = row.querySelector('.col-wd').value; const billVal = row.querySelector('.col-bill').value; 
 
-        // แปลงเป็นตัวเลขสำหรับการคำนวณ (ถ้าว่างให้เป็น 0)
-        const adsNum = Number(adsInput);
-        const depNum = Number(depInput);
-        const wdNum = Number(wdInput);
-
-        // คำนวณ Fee
+        const adsNum = Number(adsInput); const depNum = Number(depInput); const wdNum = Number(wdInput);
         const feeVal = Math.round(depNum * 0.32);
         row.querySelector('.col-fee').value = feeVal;
 
-        // คำนวณ Profit
         const profitVal = depNum - (adsNum + feeVal + wdNum);
         const profitInput = row.querySelector('.col-profit');
         profitInput.value = profitVal.toLocaleString();
         profitInput.className = `grid-input col-profit ${profitVal < 0 ? 'profit-neg' : 'profit-pos'}`;
 
-        // บันทึกข้อมูล (ถ้า input ว่าง ให้บันทึกเป็น '' ถ้าเป็น 0 ให้บันทึก 0)
-        saveData(pId, dateStr, 
-            adsInput === '' ? '' : adsNum, 
-            depInput === '' ? '' : depNum, 
-            feeVal, 
-            wdInput === '' ? '' : wdNum, 
-            billVal
-        );
+        saveData(pId, dateStr, adsInput === '' ? '' : adsNum, depInput === '' ? '' : depNum, feeVal, wdInput === '' ? '' : wdNum, billVal);
         updateFooter(pId);
     }
 
@@ -382,74 +495,97 @@
             sum.bill += Number(tr.querySelector('.col-bill').value) || 0;
         });
         sum.profit = sum.dep - (sum.ads + sum.fee + sum.wd);
+        
         document.getElementById(`sum_ads_${pId}`).innerText = sum.ads.toLocaleString();
         document.getElementById(`sum_dep_${pId}`).innerText = sum.dep.toLocaleString();
         document.getElementById(`sum_fee_${pId}`).innerText = sum.fee.toLocaleString();
         document.getElementById(`sum_wd_${pId}`).innerText = sum.wd.toLocaleString();
         document.getElementById(`sum_bill_${pId}`).innerText = sum.bill.toLocaleString();
+        
         const sumProfitEl = document.getElementById(`sum_profit_${pId}`);
         sumProfitEl.innerText = sum.profit.toLocaleString();
         sumProfitEl.className = sum.profit < 0 ? 'profit-neg' : 'profit-pos';
     }
 
-    async function uploadToCloud() {
-        const password = prompt("ถ้าอยากบันทึก ต้องใส่รหัสผ่านก่อนน๊าตัวเอง:");
-        if (password !== 'at49') {
-            alert("❌ รหัสผ่านไม่ถูกต้องน๊าา อย่ามั่วได้มั๊ย ");
-            return;
-        }
+    // ==========================================
+    // ระบบแคปเจอร์เป็นรูปภาพที่คมชัดขึ้น (High Resolution)
+    // ถอดย่อขนาดออกแบบ Canvas ออก ให้มันใช้ความละเอียดดั้งเดิมจาก Scale 2.5 ตรงๆ เลย
+    // ==========================================
+    async function captureAsImage(elementId, titleId) {
+        const el = document.getElementById(elementId);
+        let titleEl = null;
 
-        const status = document.getElementById('syncStatus');
-        status.innerText = "⏳ เค้ากำลังบันทึกข้อมูลน๊าาา รอแป๊ป...";
+        // ถ้ามีการส่ง id ของหัวข้อมา ให้เปิดแสดงหัวข้อก่อนแคปรูป
+        if (titleId) {
+            titleEl = document.getElementById(titleId);
+            if (titleEl) titleEl.style.display = 'block';
+        }
         
-        let allData = {};
-        PAIRS.forEach(p => {
-            allData[p.id] = JSON.parse(localStorage.getItem('fin_data_' + p.id) || '[]');
-        });
-        allData['team_config'] = JSON.parse(localStorage.getItem('team_config') || '{}');
+        // เติม Padding ตอนแคปภาพ จะได้มีพื้นที่ว่างรอบๆตารางสวยๆ
+        const originalPadding = el.style.padding;
+        el.style.padding = "24px 30px 30px 30px";
+
+        // รอให้หน้าจออัปเดตและซ่อนปุ่ม
+        await new Promise(r => setTimeout(r, 100));
 
         try {
-            const response = await fetch(CLOUD_URL, {
-                method: 'POST',
-                body: JSON.stringify(allData)
+            // ตั้งค่า scale เป็น 2.5 เพื่อให้รูประดับ High-Res ซูมแล้วชัดกริบ
+            const canvas = await html2canvas(el, {
+                backgroundColor: null, // พื้นหลังโปร่งใส (Transparent)
+                scale: 2.5, 
+                useCORS: true,
+                ignoreElements: (node) => node.classList.contains('no-capture') // ข้ามการแคปปุ่ม
             });
-            if(response.ok) {
-                status.innerText = "✅ บันทึกแล้วน๊าตัวเอง";
-                status.style.color = "#10b981";
-                alert("บันทึกข้อมูลแล้วน๊าจุ๊บ😘");
-            }
-        } catch (e) {
-            status.innerText = "❌ เกิดข้อผิดพลาดในการบันทึกง่าา ";
-            status.style.color = "#ef4444";
+            
+            canvas.toBlob(async function(blob) {
+                try {
+                    const item = new ClipboardItem({ "image/png": blob });
+                    await navigator.clipboard.write([item]);
+                    alert('✅ คัดลอกรูปภาพแล้วงับ');
+                } catch (err) {
+                    alert('❌ เบราว์เซอร์ไม่รองรับการคัดลอกรูปภาพ กรุณาใช้ Google Chrome หรือ Edge ครับ');
+                }
+            }, 'image/png');
+        } catch (err) {
+            alert('❌ เกิดข้อผิดพลาดในการสร้างรูปภาพ');
+        } finally {
+            // คืนค่าการแสดงผลกลับเป็นเหมือนเดิม
+            if (titleEl) titleEl.style.display = 'none';
+            el.style.padding = originalPadding;
         }
+    }
+
+    async function uploadToCloud() {
+        const password = prompt("ถ้าอยากบันทึก ต้องใส่รหัสผ่านก่อนน๊าตัวเอง:");
+        if (password !== 'at49') { alert("❌ รหัสผ่านไม่ถูกต้องน๊าา อย่ามั่วได้มั๊ย "); return; }
+        const status = document.getElementById('syncStatus');
+        status.innerText = "⏳ เค้ากำลังบันทึกข้อมูลน๊าาา รอแป๊ป..."; status.style.color = "var(--accent-gold)";
+        let allData = {};
+        PAIRS.forEach(p => { allData[p.id] = JSON.parse(localStorage.getItem('fin_data_' + p.id) || '[]'); });
+        allData['team_config'] = JSON.parse(localStorage.getItem('team_config') || '{}');
+        try {
+            const response = await fetch(CLOUD_URL, { method: 'POST', body: JSON.stringify(allData) });
+            if(response.ok) { status.innerText = "✅ บันทึกแล้วน๊าตัวเอง"; status.style.color = "var(--accent-green)"; alert("บันทึกข้อมูลแล้วน๊าจุ๊บ😘"); }
+        } catch (e) { status.innerText = "❌ เกิดข้อผิดพลาดในการบันทึกง่าา "; status.style.color = "var(--accent-red)"; }
     }
 
     async function downloadFromCloud() {
         const status = document.getElementById('syncStatus');
-        status.innerText = "⏳ เค้ากำลังดึงข้อมูลให้น๊าตัวเอง...";
+        status.innerText = "⏳ เค้ากำลังดึงข้อมูลให้น๊าตัวเอง..."; status.style.color = "var(--accent-gold)";
         try {
-            const response = await fetch(CLOUD_URL);
-            const allData = await response.json();
+            const response = await fetch(CLOUD_URL); const allData = await response.json();
             Object.keys(allData).forEach(key => {
-                if(key === 'team_config') {
-                    localStorage.setItem('team_config', JSON.stringify(allData[key]));
-                } else {
-                    localStorage.setItem('fin_data_' + key, JSON.stringify(allData[key]));
-                }
+                if(key === 'team_config') { localStorage.setItem('team_config', JSON.stringify(allData[key])); } 
+                else { localStorage.setItem('fin_data_' + key, JSON.stringify(allData[key])); }
             });
-            status.innerText = "✅ เค้าดึงข้อมูลแล้วน๊าตัวเอง! รีเฟรช...";
-            status.style.color = "#10b981";
+            status.innerText = "✅ เค้าดึงข้อมูลแล้วน๊าตัวเอง! รีเฟรช..."; status.style.color = "var(--accent-green)";
             setTimeout(() => location.reload(), 1500);
-        } catch (e) {
-            status.innerText = "❌ เกิดข้อผิดพลาดในการดึงข้อมูลง่าา";
-            status.style.color = "#ef4444";
-        }
+        } catch (e) { status.innerText = "❌ เกิดข้อผิดพลาดในการดึงข้อมูลง่าา"; status.style.color = "var(--accent-red)"; }
     }
 
     function updateDashboard() {
-        document.getElementById('dashMonthLabel').innerText = `(เดือน: ${currentGlobalMonth})`;
+        document.getElementById('dashMonthLabel').innerText = `(รอบบิล: ${currentGlobalMonth})`;
 
-        // --- ส่วนที่ 1: คำนวณยอดรายทีม ---
         let grand = { ads:0, dep:0, fee:0, wd:0, profit:0 };
         const scores = PAIRS.map(p => {
             const currentName = getTeamName(p.id);
@@ -458,10 +594,7 @@
 
             let s = { ads:0, dep:0, fee:0, wd:0, profit:0, hasActivity: false };
             monthData.forEach(r => {
-                const ads = (Number(r.ads)||0);
-                const dep = (Number(r.dep)||0);
-                const fee = (Number(r.fee)||0);
-                const wd = (Number(r.wd)||0);
+                const ads = (Number(r.ads)||0); const dep = (Number(r.dep)||0); const fee = (Number(r.fee)||0); const wd = (Number(r.wd)||0);
                 if(ads !== 0 || dep !== 0 || wd !== 0) s.hasActivity = true;
                 const profit = dep - (ads + fee + wd);
                 s.ads += ads; s.dep += dep; s.fee += fee; s.wd += wd; s.profit += profit;
@@ -469,66 +602,72 @@
             return { name: currentName, ...s };
         }).filter(item => item.hasActivity && item.name !== "ว่าง");
 
-        scores.forEach(s => {
-            grand.ads += s.ads; grand.dep += s.dep; grand.fee += s.fee; grand.wd += s.wd; grand.profit += s.profit;
-        });
+        scores.forEach(s => { grand.ads += s.ads; grand.dep += s.dep; grand.fee += s.fee; grand.wd += s.wd; grand.profit += s.profit; });
 
         const sorted = [...scores].sort((a,b) => b.profit - a.profit);
         
-        // Render Rank List
         document.getElementById('rankList').innerHTML = sorted.map((s, i) => `
             <div class="rank-card">
-                <div style="width:50px; font-size:24px;">${i+1}</div>
-                <div style="flex-grow:1; font-size:18px;">${s.name}</div>
-                <div style="font-weight:bold; color:#fbbf24; font-size:20px;">${s.profit.toLocaleString()} บาท</div>
+                <div style="width:50px; font-size:24px; color:var(--text-muted); font-weight: 500;">${i+1}</div>
+                <div style="flex-grow:1; font-size:18px; font-weight: 400;">${s.name}</div>
+                <div style="font-weight:600; font-size:22px;" class="${s.profit < 0 ? 'profit-neg' : 'profit-pos'}">${s.profit.toLocaleString()} บาท</div>
             </div>
         `).join('');
 
-        // Render Commission List
-        document.getElementById('commList').innerHTML = scores.map(s => {
+        document.getElementById('commList').innerHTML = scores.map((s, i) => {
             let rate = s.profit >= 2500000 ? 0.14 : s.profit >= 1500000 ? 0.12 : s.profit >= 800000 ? 0.10 : s.profit >= 400000 ? 0.08 : 0.06;
             let total = Math.round(s.profit * rate);
+            let half = total / 2;
+            let ratePercent = (rate*100).toFixed(0);
+
             return `
-                <div class="comm-box">
-                    <div style="color:#3b82f6; font-weight:bold; margin-bottom:15px; border-bottom:1px solid #334155; padding-bottom:10px;">${s.name}</div>
-                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>กำไรสุทธิ:</span><b>${s.profit.toLocaleString()}</b></div>
-                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>เรท:</span><b style="color:#fbbf24">${(rate*100).toFixed(0)}%</b></div>
-                    <div style="background:#0f172a; padding:10px; border-radius:5px; margin-top:10px;">
-                        <div style="display:flex; justify-content:space-between; color:#4ade80; margin-bottom:5px;">
-                            <span>ยอดเต็ม:</span>
-                            <b>${total.toLocaleString()}</b>
+                <div id="capture_comm_box_${i}" class="comm-box" style="background: #1e293b;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                        <div style="color: #3b82f6; font-size: 1.4em; font-weight: 500;">${s.name}</div>
+                        <button class="btn-copy-small no-capture" onclick="captureAsImage('capture_comm_box_${i}')">คัดลอก</button>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:1.1em;">
+                        <span style="color: #94a3b8;">กำไรสุทธิ:</span>
+                        <b class="${s.profit < 0 ? 'profit-neg' : 'profit-pos'}">${s.profit.toLocaleString()}</b>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:20px; font-size:1.1em;">
+                        <span style="color: #94a3b8;">เรท:</span>
+                        <b style="color: #fbbf24;">${ratePercent}%</b>
+                    </div>
+                    <div style="background: #0f172a; padding: 20px; border-radius: 8px;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:15px; align-items:center;">
+                            <span style="color: #94a3b8; font-size: 1em;">ยอดเต็ม:</span>
+                            <b style="color: #10b981; font-size: 1.3em;">${total.toLocaleString()}</b>
                         </div>
-                        <div style="display:flex; justify-content:space-between; color:#94a3b8; font-size:13px; border-top:1px dashed #334155; padding-top:5px;">
-                            <span>หาร 2:</span>
-                            <b>${(total/2).toLocaleString()}</b>
+                        <div style="display:flex; justify-content:space-between; border-top:1px dashed #334155; padding-top:15px; align-items:center;">
+                            <span style="color: #94a3b8; font-size: 1em;">หาร 2:</span>
+                            <b style="color: #f8fafc; font-size: 1.2em;">${half.toLocaleString()}</b>
                         </div>
                     </div>
                 </div>
             `;
         }).join('');
 
-        // Render Grand Table
         document.getElementById('grandTable').innerHTML = scores.map(s => `
             <tr>
-                <td style="color:#fbbf24;">${s.name}</td>
-                <td style="text-align:center;">${s.ads.toLocaleString()}</td>
-                <td style="text-align:center;">${s.dep.toLocaleString()}</td>
-                <td style="text-align:center;">${s.fee.toLocaleString()}</td>
-                <td style="text-align:center;">${s.wd.toLocaleString()}</td>
-                <td style="text-align:center; font-weight:bold; color:${s.profit>0?'#4ade80':'#f87171'}">${s.profit.toLocaleString()}</td>
+                <td class="text-left" style="color:var(--accent-blue); padding-left:24px; font-weight:500;">${s.name}</td>
+                <td>${s.ads ? s.ads.toLocaleString() : '0'}</td>
+                <td>${s.dep ? s.dep.toLocaleString() : '0'}</td>
+                <td class="fee-col">${s.fee ? s.fee.toLocaleString() : '0'}</td>
+                <td>${s.wd ? s.wd.toLocaleString() : '0'}</td>
+                <td style="font-weight:600;" class="${s.profit < 0 ? 'profit-neg' : 'profit-pos'}">${s.profit ? s.profit.toLocaleString() : '0'}</td>
             </tr>
         `).join('') + `
-            <tr style="background:#fbbf24; color:black; font-weight:bold; border-top:2px solid white;">
-                <td>TOTAL</td>
-                <td style="text-align:center;">${grand.ads.toLocaleString()}</td>
-                <td style="text-align:center;">${grand.dep.toLocaleString()}</td>
-                <td style="text-align:center;">${grand.fee.toLocaleString()}</td>
-                <td style="text-align:center;">${grand.wd.toLocaleString()}</td>
-                <td style="text-align:center;">${grand.profit.toLocaleString()}</td>
+            <tr style="background:var(--card-hover);">
+                <td class="text-left" style="padding-left:24px; font-weight:600; color:var(--text-main);">TOTAL</td>
+                <td style="font-weight:600;">${grand.ads.toLocaleString()}</td>
+                <td style="font-weight:600;">${grand.dep.toLocaleString()}</td>
+                <td style="font-weight:600;" class="fee-col">${grand.fee.toLocaleString()}</td>
+                <td style="font-weight:600;">${grand.wd.toLocaleString()}</td>
+                <td style="font-weight:600;" class="${grand.profit < 0 ? 'profit-neg' : 'profit-pos'}">${grand.profit.toLocaleString()}</td>
             </tr>
         `;
 
-        // --- ส่วนที่ 2: ตารางรวมรายวัน (Daily Aggregate) ---
         const [y, m] = currentGlobalMonth.split('-').map(Number);
         const days = new Date(y, m, 0).getDate();
         const aggTbody = document.getElementById('dailyAggregateTable');
@@ -541,53 +680,41 @@
             const dateStr = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
             let daySum = { ads:0, dep:0, fee:0, wd:0, profit:0 };
 
-            // วนลูปทุกทีม (P1-P5) เพื่อรวมยอดของวันนั้นๆ
             PAIRS.forEach(p => {
                 const teamData = JSON.parse(localStorage.getItem('fin_data_' + p.id) || '[]');
                 const dayData = teamData.find(r => r.date === dateStr) || {};
-                
-                const a = Number(dayData.ads) || 0;
-                const dp = Number(dayData.dep) || 0;
-                const f = Number(dayData.fee) || 0;
-                const w = Number(dayData.wd) || 0;
-                
-                daySum.ads += a;
-                daySum.dep += dp;
-                daySum.fee += f;
-                daySum.wd += w;
+                daySum.ads += Number(dayData.ads) || 0;
+                daySum.dep += Number(dayData.dep) || 0;
+                daySum.fee += Number(dayData.fee) || 0;
+                daySum.wd += Number(dayData.wd) || 0;
             });
             daySum.profit = daySum.dep - (daySum.ads + daySum.fee + daySum.wd);
 
-            // สะสมยอดรวมทั้งเดือน
-            aggTotal.ads += daySum.ads;
-            aggTotal.dep += daySum.dep;
-            aggTotal.fee += daySum.fee;
-            aggTotal.wd += daySum.wd;
-            aggTotal.profit += daySum.profit;
+            aggTotal.ads += daySum.ads; aggTotal.dep += daySum.dep; aggTotal.fee += daySum.fee;
+            aggTotal.wd += daySum.wd; aggTotal.profit += daySum.profit;
 
             const profitClass = daySum.profit < 0 ? 'profit-neg' : 'profit-pos';
 
             aggTbody.innerHTML += `
-                <tr class="agg-row">
-                    <td style="background:#0f172a; color:#94a3b8;">${dateStr}</td>
-                    <td>${daySum.ads.toLocaleString()}</td>
-                    <td>${daySum.dep.toLocaleString()}</td>
-                    <td>${daySum.fee.toLocaleString()}</td>
-                    <td>${daySum.wd.toLocaleString()}</td>
-                    <td style="font-weight:bold;" class="${profitClass}">${daySum.profit.toLocaleString()}</td>
+                <tr>
+                    <td class="text-center" style="color:var(--text-main); font-weight: 500;">${d} ${new Date(y, m-1, d).toLocaleDateString('th-TH', {month:'short'})}</td>
+                    <td>${daySum.ads ? daySum.ads.toLocaleString() : '0'}</td>
+                    <td>${daySum.dep ? daySum.dep.toLocaleString() : '0'}</td>
+                    <td class="agg-fee-cell">${daySum.fee ? daySum.fee.toLocaleString() : '0'}</td>
+                    <td>${daySum.wd ? daySum.wd.toLocaleString() : '0'}</td>
+                    <td class="${profitClass}">${daySum.profit ? daySum.profit.toLocaleString() : '0'}</td>
                 </tr>
             `;
         }
 
-        // Footer ของตารางรวมรายวัน
         aggFooter.innerHTML = `
-            <tr style="background:#fbbf24; color:black; font-weight:bold; border-top:2px solid white;">
-                <td style="text-align:center; padding:12px;">รวมทั้งเดือน</td>
-                <td style="text-align:center;">${aggTotal.ads.toLocaleString()}</td>
-                <td style="text-align:center;">${aggTotal.dep.toLocaleString()}</td>
-                <td style="text-align:center;">${aggTotal.fee.toLocaleString()}</td>
-                <td style="text-align:center;">${aggTotal.wd.toLocaleString()}</td>
-                <td style="text-align:center;">${aggTotal.profit.toLocaleString()}</td>
+            <tr style="background:var(--card-hover); border-top: 2px solid var(--border-color);">
+                <td class="text-center" style="font-weight:600; color:white;">รวมทั้งเดือน</td>
+                <td style="font-weight:600;">${aggTotal.ads.toLocaleString()}</td>
+                <td style="font-weight:600;">${aggTotal.dep.toLocaleString()}</td>
+                <td style="font-weight:600;" class="agg-fee-cell">${aggTotal.fee.toLocaleString()}</td>
+                <td style="font-weight:600;">${aggTotal.wd.toLocaleString()}</td>
+                <td style="font-weight:600;" class="${aggTotal.profit < 0 ? 'profit-neg' : 'profit-pos'}">${aggTotal.profit.toLocaleString()}</td>
             </tr>
         `;
     }
